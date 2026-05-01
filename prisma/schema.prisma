@@ -1,0 +1,254 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model AppUser {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  phone       String    @unique
+  name        String
+  email       String    @unique
+  dateOfBirth DateTime?
+  gender      String?
+  state       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  purchases       Purchase[]
+  otpCodes        AppOtpCode[]
+  paymentSessions PaymentSession[]
+  sessions        AppSession[]
+  bookmarks       UserBookmark[]
+  categoryBookmarks UserCategoryBookmark[]
+  videoProgress   UserVideoProgress[]
+}
+
+model AppOtpCode {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String?  @db.ObjectId
+  user   AppUser? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([phone])
+  @@index([expiresAt])
+}
+
+model AppSession {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId String  @db.ObjectId
+  user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  deviceId         String
+  refreshTokenHash String
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([userId, deviceId])
+  @@index([userId])
+  @@index([deviceId])
+  @@index([expiresAt])
+}
+
+model AppContentPage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Purchase {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String   @db.ObjectId
+  user              AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind              String // 'video' | 'category'
+  targetId          String   @db.ObjectId
+  status            String   @default("pending") // pending | completed | failed
+  provider          String   @default("razorpay")
+  amountTotalCents  Int
+  currency          String   @default("INR")
+  razorpayOrderId   String?  @unique
+  razorpayPaymentId String?
+  accessExpiresAt   DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([kind, targetId])
+  @@index([accessExpiresAt])
+}
+
+model PaymentSession {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
+  userId    String   @db.ObjectId
+  user      AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String // 'video' | 'category'
+  targetId  String   @db.ObjectId
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model Category {
+  id                  String             @id @default(auto()) @map("_id") @db.ObjectId
+  name                String             @unique
+  thumbnailUrl        String             @default("")
+  packPriceLabel      String             @default("")
+  /**
+   * INR in paise for Stripe Checkout when no Price ID is configured
+   */
+  checkoutAmountCents Int                @default(799900)
+  sortOrder           Int                @default(0)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  videos              Video[]
+  packItems           CategoryPackItem[]
+  bookmarks           UserCategoryBookmark[]
+}
+
+model Video {
+  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+  title                String             @unique
+  subtitle             String
+  meta                 String
+  duration             String
+  level                String
+  language             String
+  lessons              Int
+  priceLabel           String
+  individualPriceLabel String?
+  rating               Float
+  description          String
+  thumbnailUrl         String
+  dashUrl              String
+  topicsJson           String
+  /**
+   * INR in paise for one-off Checkout
+   */
+  checkoutAmountCents  Int                @default(99900)
+  accessValidityDays   Int                @default(0)
+  isFree               Boolean            @default(false)
+  published            Boolean            @default(true)
+  sortOrder            Int                @default(0)
+  categoryId           String             @db.ObjectId
+  category             Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  packItems            CategoryPackItem[]
+  bookmarks            UserBookmark[]
+  progressEntries      UserVideoProgress[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+model CategoryPackItem {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId String   @db.ObjectId
+  videoId    String   @db.ObjectId
+  sortOrder  Int      @default(0)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  video      Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, videoId])
+}
+
+model Order {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  stripeSessionId  String?  @unique
+  stripePaymentId  String?
+  customerEmail    String
+  amountTotalCents Int
+  currency         String   @default("inr")
+  status           String
+  lineDescription  String   @default("")
+  createdAt        DateTime @default(now())
+}
+
+model CarouselItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  subtitle  String   @default("")
+  imageUrl  String
+  kind      String   @default("custom") // custom | video | category | url
+  target    String   @default("") // videoTitle | categoryName | externalUrl
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  startAt   DateTime?
+  endAt     DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+model AppHomeConfig {
+  id                          String   @id @default(auto()) @map("_id") @db.ObjectId
+  key                         String   @unique @default("default")
+  recommendedVideoTitlesJson  String   @default("[]")
+  featuredCategoryNamesJson   String   @default("[]")
+  showContinueWatching        Boolean  @default(true)
+  isReviewMode                Boolean  @default(false)
+  buyButtonText               String   @default("Buy Now")
+  updatedAt                   DateTime @updatedAt
+  createdAt                   DateTime @default(now())
+}
+
+model UserBookmark {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoId   String   @db.ObjectId
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, videoId])
+  @@index([userId])
+}
+
+model UserVideoProgress {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoId     String   @db.ObjectId
+  video       Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  currentTime Float    @default(0)
+  duration    Float    @default(0)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, videoId])
+  @@index([userId, updatedAt])
+}
+
+model UserCategoryBookmark {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  user       AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String   @db.ObjectId
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, categoryId])
+  @@index([userId])
+}
