@@ -72,9 +72,9 @@ export async function GET(req: Request) {
     amountCents,
     currency: 'INR',
     customer: {
-      name: session.user.name,
-      email: session.user.email,
-      contact: session.user.phone.replace(/^\+/, ''),
+      name: session.user?.name ?? 'Customer',
+      email: session.user?.email ?? '',
+      contact: (session.user?.phone ?? '').replace(/^\+/, ''),
     },
     description: session.kind === 'video' ? `Video: ${video?.title ?? 'Video'}` : `Category pack: ${category?.name ?? 'Category'}`,
   });
