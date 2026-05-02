@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { use, useEffect, useMemo, useState } from 'react';
+import { use, useCallback, useEffect, useMemo, useState } from 'react';
 
 type SessionPayload = {
   ok: true;
@@ -25,11 +25,24 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
   const [session, setSession] = useState<SessionPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'ready' | 'processing' | 'done'>('idle');
+  const [scriptReady, setScriptReady] = useState(false);
+  const [autoOpened, setAutoOpened] = useState(false);
 
-  const deepLinkSuccess = useMemo(() => `astrolearn://payment/success?status=success`, []);
-  const deepLinkFailed = useMemo(() => `astrolearn://payment/success?status=failed`, []);
+  const paymentReturnBase = useMemo(
+    () => process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? '',
+    []
+  );
+  const deepLinkSuccess = useMemo(
+    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=success` : ''),
+    [paymentReturnBase]
+  );
+  const deepLinkFailed = useMemo(
+    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=failed` : ''),
+    [paymentReturnBase]
+  );
 
   const brandColor = '#8F3D66'; // Maroon brand color
+  const isSessionLoading = !session && !error;
 
   useEffect(() => {
     if (!token) {
@@ -55,7 +68,7 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
     })();
   }, [token]);
 
-  const startPayment = async () => {
+  const startPayment = useCallback(async () => {
     if (!session || !window.Razorpay) return;
     setStatus('processing');
     const rzp = new window.Razorpay({
@@ -84,28 +97,53 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
           const json = (await res.json()) as Record<string, unknown>;
           if (!res.ok) {
             setError(typeof json?.error === 'string' ? json.error : 'Payment verification failed');
-            window.location.href = deepLinkFailed;
+            if (deepLinkFailed) {
+              window.location.href = deepLinkFailed;
+            }
             return;
           }
           setStatus('done');
-          window.location.href = deepLinkSuccess;
+          if (deepLinkSuccess) {
+            window.location.href = deepLinkSuccess;
+          } else {
+            setError('Payment return URL is not configured.');
+          }
         } catch (e) {
           setError(e instanceof Error ? e.message : 'Payment verification failed');
-          window.location.href = deepLinkFailed;
+          if (deepLinkFailed) {
+            window.location.href = deepLinkFailed;
+          }
         }
       },
       modal: {
         ondismiss: () => {
-          window.location.href = deepLinkFailed;
+          if (deepLinkFailed) {
+            window.location.href = deepLinkFailed;
+          } else {
+            setError('Payment return URL is not configured.');
+          }
         },
       },
     });
     rzp.open();
-  };
+  }, [deepLinkFailed, deepLinkSuccess, session, token]);
+
+  useEffect(() => {
+    if (!session || error) return;
+    if (!scriptReady || autoOpened) return;
+    if (status !== 'ready') return;
+    if (!window.Razorpay) return;
+    setAutoOpened(true);
+    void startPayment();
+  }, [autoOpened, error, scriptReady, session, startPayment, status]);
 
   return (
     <div className="min-h-screen bg-[#0F172A] font-sans selection:bg-rose-500/30">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="afterInteractive"
+        onLoad={() => setScriptReady(true)}
+      />
       
       <div className="mx-auto flex max-w-lg flex-col gap-6 px-4 pt-16 pb-10">
         {/* Brand Header */}
@@ -147,7 +185,9 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
               <div className="flex items-center justify-between border-b border-slate-700/50 pb-4">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Item Details</span>
-                  <p className="text-sm font-medium text-slate-200">{session?.description ?? 'Loading session…'}</p>
+                  <p className="text-sm font-medium text-slate-200">
+                    {session?.description ?? 'Loading session…'}
+                  </p>
                 </div>
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/50 text-slate-400">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -157,7 +197,16 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
               <div className="flex items-center justify-between pt-4">
                  <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Amount</span>
-                  <p className="text-2xl font-bold text-white">₹{session ? (session.amountCents / 100).toLocaleString('en-IN') : '—'}</p>
+                   {isSessionLoading ? (
+                     <div className="flex items-center gap-2 text-slate-400">
+                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-500/40 border-t-slate-200" />
+                       <span className="text-sm font-medium">Loading amount…</span>
+                     </div>
+                   ) : (
+                     <p className="text-2xl font-bold text-white">
+                       ₹{session ? (session.amountCents / 100).toLocaleString('en-IN') : '—'}
+                     </p>
+                   )}
                 </div>
                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
@@ -180,7 +229,11 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 )}
                 <span className="text-base font-bold text-white">
-                  {status === 'processing' ? 'Processing…' : 'Proceed to Pay'}
+                  {status === 'processing'
+                    ? 'Processing…'
+                    : isSessionLoading
+                      ? 'Preparing…'
+                      : 'Proceed to Pay'}
                 </span>
               </div>
             </button>
@@ -208,5 +261,3 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
     </div>
   );
 }
-
-
