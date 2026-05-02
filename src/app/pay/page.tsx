@@ -4,6 +4,14 @@ import Script from 'next/script';
 import { use, useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+};
+
 type SessionPayload = {
   ok: true;
   keyId: string;
@@ -139,7 +147,17 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
   }, [autoOpened, error, scriptReady, session, startPayment, status]);
 
   return (
-    <div className="min-h-screen bg-[#0F172A] font-sans selection:bg-rose-500/30">
+    <div className="min-h-screen bg-[#0F172A] font-sans selection:bg-rose-500/30 overflow-hidden touch-none">
+      <style dangerouslySetInnerHTML={{ __html: `
+        html, body {
+          overscroll-behavior: none;
+          overflow: hidden;
+          height: 100%;
+          position: fixed;
+          width: 100%;
+          touch-action: none;
+        }
+      `}} />
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
         strategy="afterInteractive"
