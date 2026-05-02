@@ -4,6 +4,8 @@ import Script from 'next/script';
 import { use, useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
