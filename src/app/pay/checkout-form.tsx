@@ -218,7 +218,7 @@ export default function CheckoutForm() {
                 <button
                   type="button"
                   onClick={() => void startPayment()}
-                  disabled={!session || status !== 'ready'}
+                  disabled={!session || status !== 'ready' || !scriptReady}
                   className="group relative mt-8 w-full overflow-hidden rounded-2xl py-4 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
                 >
                   <div className="absolute inset-0 bg-rose-600 transition-colors group-hover:bg-rose-500" />
