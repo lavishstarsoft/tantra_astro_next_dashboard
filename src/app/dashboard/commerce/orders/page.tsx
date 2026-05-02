@@ -1,5 +1,9 @@
 import { prisma } from '@/lib/prisma';
 
+function isValidObjectId(id: string) {
+  return /^[0-9a-fA-F]{24}$/.test(id);
+}
+
 export default async function OrdersPage() {
   const purchases = await prisma.purchase.findMany({
     orderBy: { createdAt: 'desc' },
@@ -8,8 +12,13 @@ export default async function OrdersPage() {
   });
 
   // Resolve target names
-  const videoIds = purchases.filter((p) => p.kind === 'video').map((p) => p.targetId);
-  const categoryIds = purchases.filter((p) => p.kind === 'category').map((p) => p.targetId);
+  const videoIds = purchases
+    .filter((p) => p.kind === 'video' && isValidObjectId(p.targetId))
+    .map((p) => p.targetId);
+    
+  const categoryIds = purchases
+    .filter((p) => p.kind === 'category' && isValidObjectId(p.targetId))
+    .map((p) => p.targetId);
 
   const [videos, categories] = await Promise.all([
     prisma.video.findMany({

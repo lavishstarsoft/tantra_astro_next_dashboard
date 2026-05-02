@@ -8,8 +8,9 @@ export async function GET() {
   if (!gate.ok) {
     return gate.response;
   }
-  const orders = await prisma.order.findMany({
+  const orders = await prisma.purchase.findMany({
     orderBy: { createdAt: 'desc' },
+    include: { user: true },
     take: 200,
   });
   return NextResponse.json({ orders });

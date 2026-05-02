@@ -9,10 +9,10 @@ export async function GET() {
     return gate.response;
   }
 
-  const [videoCount, categoryCount, orderAgg, publishedVideos] = await Promise.all([
+  const [videoCount, categoryCount, purchaseAgg, publishedVideos] = await Promise.all([
     prisma.video.count(),
     prisma.category.count(),
-    prisma.order.aggregate({
+    prisma.purchase.aggregate({
       where: { status: 'completed' },
       _sum: { amountTotalCents: true },
       _count: true,
@@ -24,7 +24,7 @@ export async function GET() {
     videos: videoCount,
     publishedVideos,
     categories: categoryCount,
-    orders: orderAgg._count,
-    revenueCents: orderAgg._sum.amountTotalCents ?? 0,
+    orders: purchaseAgg._count,
+    revenueCents: purchaseAgg._sum.amountTotalCents ?? 0,
   });
 }
