@@ -26,10 +26,10 @@ export async function GET(req: Request) {
 
   const [videos, categories] = await Promise.all([
     videoIds.length
-      ? prisma.video.findMany({ where: { id: { in: videoIds } }, select: { title: true } })
+      ? prisma.video.findMany({ where: { id: { in: videoIds } }, select: { id: true, title: true } })
       : Promise.resolve([]),
     categoryIds.length
-      ? prisma.category.findMany({ where: { id: { in: categoryIds } }, select: { name: true } })
+      ? prisma.category.findMany({ where: { id: { in: categoryIds } }, select: { id: true, name: true } })
       : Promise.resolve([]),
   ]);
 
