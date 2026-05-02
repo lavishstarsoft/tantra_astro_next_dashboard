@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 export function PaymentReturnClient() {
   const searchParams = useSearchParams();
   const status = searchParams.get('status') ?? 'success';
   const isSuccess = status === 'success';
+  const [countdown, setCountdown] = useState(3);
 
   const appScheme = useMemo(
     () => (process.env.NEXT_PUBLIC_APP_SCHEME ?? '').replace(/:\/\//, ''),
@@ -20,6 +21,35 @@ export function PaymentReturnClient() {
         : '',
     [appScheme, status]
   );
+
+  // Automatic redirect logic
+  useEffect(() => {
+    if (!deepLink || !isSuccess) return;
+
+    // Countdown timer for UI
+    const countdownTimer = setInterval(() => {
+      setCountdown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    // Redirect after 3 seconds
+    const redirectTimer = setTimeout(() => {
+      window.location.replace(deepLink);
+      
+      // Attempt to close window as a fallback after redirect
+      setTimeout(() => {
+        try {
+          window.close();
+        } catch (e) {
+          console.log('Auto-close failed', e);
+        }
+      }, 1000);
+    }, 3000);
+
+    return () => {
+      clearInterval(countdownTimer);
+      clearTimeout(redirectTimer);
+    };
+  }, [deepLink, isSuccess]);
 
   return (
     <div className="min-h-screen bg-[#0F172A] font-sans selection:bg-rose-500/30">
@@ -77,6 +107,12 @@ export function PaymentReturnClient() {
               ? 'Your transaction was completed successfully. Your access is now active.'
               : 'Something went wrong with your payment. No funds were charged if the session failed.'}
           </p>
+          
+          {isSuccess && deepLink && (
+            <p className="mt-2 text-xs font-medium text-emerald-500 animate-pulse">
+              Redirecting to app in {countdown}s...
+            </p>
+          )}
         </div>
 
         {/* Action Buttons */}
