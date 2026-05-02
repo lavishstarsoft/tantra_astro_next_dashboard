@@ -43,7 +43,14 @@ export async function PATCH(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const data = { ...parsed.data } as any;
+  const data = { ...parsed.data } as { 
+    name?: string; 
+    packPriceLabel?: string; 
+    accessValidityDays?: number; 
+    thumbnailUrl?: string; 
+    sortOrder?: number; 
+    checkoutAmountCents?: number 
+  };
   if (data.packPriceLabel) {
     data.checkoutAmountCents = parseAmountFromLabel(data.packPriceLabel) ?? 799_900;
   }
