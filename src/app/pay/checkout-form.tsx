@@ -24,6 +24,8 @@ declare global {
 export default function CheckoutForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
+  const target = searchParams.get('target') ?? '';
+  const kind = searchParams.get('kind') ?? '';
   
   const [session, setSession] = useState<SessionPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,12 +39,12 @@ export default function CheckoutForm() {
   );
   
   const deepLinkSuccess = useMemo(
-    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=success` : ''),
-    [paymentReturnBase]
+    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=success&target=${encodeURIComponent(target)}&kind=${encodeURIComponent(kind)}` : ''),
+    [paymentReturnBase, target, kind]
   );
   const deepLinkFailed = useMemo(
-    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=failed` : ''),
-    [paymentReturnBase]
+    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=failed&target=${encodeURIComponent(target)}&kind=${encodeURIComponent(kind)}` : ''),
+    [paymentReturnBase, target, kind]
   );
 
   const brandColor = '#8F3D66'; 
@@ -151,14 +153,26 @@ export default function CheckoutForm() {
         onLoad={() => setScriptReady(true)}
       />
 
-      <div className="flex flex-col items-center gap-3">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1E293B] border border-slate-700 shadow-xl">
-           <div className="h-10 w-10 rounded-full" style={{ backgroundColor: brandColor }} />
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-rose-600 to-amber-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-[#1E293B] border border-slate-700 shadow-xl overflow-hidden">
+            <Image 
+              src="/logo.png" 
+              alt="Logo" 
+              width={80} 
+              height={80}
+              className="object-contain p-2"
+            />
+          </div>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Thantra Astro</h1>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold tracking-tight text-white">Thantra Astro</h1>
+          <p className="text-xs text-slate-500 mt-1">Premium Learning Experience</p>
+        </div>
         <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 border border-emerald-500/20">
           <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Secure Encrypted Session</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Secure Payment Session</span>
         </div>
       </div>
 

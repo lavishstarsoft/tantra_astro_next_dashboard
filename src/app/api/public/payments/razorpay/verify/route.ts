@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     }
   }
 
-  await prisma.purchase.update({
+  const updatedPurchase = await prisma.purchase.update({
     where: { id: purchase.id },
     data: {
       status: 'completed',
@@ -74,6 +74,30 @@ export async function POST(req: Request) {
       accessExpiresAt,
     },
   });
+
+  // Create notification for user
+  try {
+    let targetName = 'Content';
+    if (purchase.kind === 'video') {
+      const v = await prisma.video.findUnique({ where: { id: purchase.targetId }, select: { title: true } });
+      if (v) targetName = v.title;
+    } else {
+      const c = await prisma.category.findUnique({ where: { id: purchase.targetId }, select: { name: true } });
+      if (c) targetName = c.name;
+    }
+
+    await prisma.notification.create({
+      data: {
+        userId: purchase.userId,
+        title: 'Purchase Successful! 🎉',
+        body: `You have successfully purchased "${targetName}". Start learning now!`,
+        type: 'purchase',
+        data: JSON.stringify({ kind: purchase.kind, targetId: purchase.targetId, targetName }),
+      },
+    });
+  } catch (e) {
+    console.error('Failed to create purchase notification', e);
+  }
 
   await prisma.paymentSession.delete({ where: { token } });
 

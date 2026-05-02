@@ -32,6 +32,7 @@ model AppUser {
   bookmarks       UserBookmark[]
   categoryBookmarks UserCategoryBookmark[]
   videoProgress   UserVideoProgress[]
+  notifications   Notification[]
 }
 
 model AppOtpCode {
@@ -252,4 +253,37 @@ model UserCategoryBookmark {
 
   @@unique([userId, categoryId])
   @@index([userId])
+}
+
+model UpcomingItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  subtitle    String?
+  description String?
+  imageUrl    String?
+  kind        String   @default("video") // video | category
+  releaseDate String?  // e.g. "Coming this June" or "June 15"
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  type      String   @default("general") // purchase | new_content | offer | general
+  imageUrl  String?
+  data      String?  // JSON string for extra data (videoTitle, categoryName, etc.)
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
 }

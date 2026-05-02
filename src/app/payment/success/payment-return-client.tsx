@@ -6,20 +6,19 @@ import { useSearchParams } from 'next/navigation';
 export function PaymentReturnClient() {
   const searchParams = useSearchParams();
   const status = searchParams.get('status') ?? 'success';
+  const target = searchParams.get('target') ?? '';
+  const kind = searchParams.get('kind') ?? '';
   const isSuccess = status === 'success';
   const [countdown, setCountdown] = useState(3);
 
-  const appScheme = useMemo(
-    () => (process.env.NEXT_PUBLIC_APP_SCHEME ?? '').replace(/:\/\//, ''),
-    []
-  );
+  const appScheme = 'astrolearn';
 
   const deepLink = useMemo(
     () =>
       appScheme
-        ? `${appScheme}://payment/success?status=${encodeURIComponent(status)}`
+        ? `${appScheme}://payment/success?status=${encodeURIComponent(status)}&target=${encodeURIComponent(target)}&kind=${encodeURIComponent(kind)}`
         : '',
-    [appScheme, status]
+    [appScheme, status, target, kind]
   );
 
   // Automatic redirect logic
@@ -53,11 +52,16 @@ export function PaymentReturnClient() {
 
   return (
     <div className="min-h-screen bg-[#0F172A] font-sans selection:bg-rose-500/30">
-      <div className="mx-auto flex max-w-lg flex-col items-center px-4 pt-24 pb-10 text-center">
+      <div className="mx-auto flex max-w-lg flex-col items-center px-4 pt-16 pb-10 text-center">
+        {/* Logo */}
+        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1E293B] border border-slate-700 shadow-xl overflow-hidden">
+           <img src="/logo.png" alt="Logo" className="h-full w-full object-contain p-2" />
+        </div>
+
         {/* Status Icon */}
         <div className="relative mb-8">
           <div
-            className={`flex h-24 w-24 items-center justify-center rounded-3xl border shadow-2xl transition-all duration-700 ${
+            className={`flex h-20 w-20 items-center justify-center rounded-full border shadow-2xl transition-all duration-700 ${
               isSuccess
                 ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
                 : 'border-rose-500/30 bg-rose-500/10 text-rose-500'
@@ -65,7 +69,7 @@ export function PaymentReturnClient() {
             {isSuccess ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12"
+                className="h-10 w-10"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -77,7 +81,7 @@ export function PaymentReturnClient() {
             ) : (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12"
+                className="h-10 w-10"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -91,7 +95,7 @@ export function PaymentReturnClient() {
           </div>
           {/* Decorative pulse */}
           <div
-            className={`absolute inset-0 -z-10 animate-ping rounded-3xl opacity-20 ${
+            className={`absolute inset-0 -z-10 animate-ping rounded-full opacity-20 ${
               isSuccess ? 'bg-emerald-500' : 'bg-rose-500'
             }`}
           />
@@ -102,16 +106,19 @@ export function PaymentReturnClient() {
           <h1 className="text-3xl font-bold tracking-tight text-white">
             {isSuccess ? 'Payment Successful' : 'Payment Failed'}
           </h1>
-          <p className="text-base text-slate-400 leading-relaxed max-w-[280px] mx-auto">
+          <p className="text-base text-slate-400 leading-relaxed max-w-[320px] mx-auto">
             {isSuccess
-              ? 'Your transaction was completed successfully. Your access is now active.'
-              : 'Something went wrong with your payment. No funds were charged if the session failed.'}
+              ? 'Your transaction was completed successfully. Your content is now available in the app.'
+              : 'Something went wrong with your payment. Please try again or contact support.'}
           </p>
           
-          {isSuccess && deepLink && (
-            <p className="mt-2 text-xs font-medium text-emerald-500 animate-pulse">
-              Redirecting to app in {countdown}s...
-            </p>
+          {isSuccess && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-1.5 border border-emerald-500/20 mx-auto">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest">
+                Redirecting to app in {countdown}s
+              </span>
+            </div>
           )}
         </div>
 
