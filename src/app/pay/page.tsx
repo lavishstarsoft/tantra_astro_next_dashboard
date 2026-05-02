@@ -159,112 +159,118 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-slate-800 bg-[#1E293B]/50 backdrop-blur-xl shadow-2xl">
-          {/* Progress Bar (Visual) */}
-          <div className="h-1 w-full bg-slate-800">
-            <div 
-              className="h-full bg-rose-500 transition-all duration-1000 ease-out" 
-              style={{ width: status === 'ready' ? '60%' : status === 'processing' ? '90%' : status === 'done' ? '100%' : '10%' }}
-            />
+        {isSessionLoading && !error ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1E293B] border border-slate-700 shadow-xl">
+               <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-500/40 border-t-rose-500" />
+             </div>
+             <p className="text-sm font-medium text-slate-400 animate-pulse">Securing payment session…</p>
           </div>
-
-          <div className="p-8">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-slate-200">Checkout</h2>
-              <p className="text-sm text-slate-400">Complete your secure transaction to continue.</p>
-            </div>
-
-            {error ? (
-              <div className="mt-6 flex flex-col gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-rose-500">Transaction Error</span>
-                <p className="text-sm text-rose-200/80 leading-relaxed">{error}</p>
+        ) : (
+          <>
+            <div className="overflow-hidden rounded-3xl border border-slate-800 bg-[#1E293B]/50 backdrop-blur-xl shadow-2xl">
+              {/* Progress Bar (Visual) */}
+              <div className="h-1 w-full bg-slate-800">
+                <div 
+                  className="h-full bg-rose-500 transition-all duration-1000 ease-out" 
+                  style={{ width: status === 'ready' ? '60%' : status === 'processing' ? '90%' : status === 'done' ? '100%' : '10%' }}
+                />
               </div>
-            ) : null}
 
-            {/* Order Details Card */}
-            <div className="mt-8 rounded-2xl border border-slate-700/50 bg-[#0F172A]/40 p-5">
-              <div className="flex items-center justify-between border-b border-slate-700/50 pb-4">
+              <div className="p-8">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Item Details</span>
-                  <p className="text-sm font-medium text-slate-200">
-                    {session?.description ?? 'Loading session…'}
-                  </p>
+                  <h2 className="text-lg font-semibold text-slate-200">Checkout</h2>
+                  <p className="text-sm text-slate-400">Complete your secure transaction to continue.</p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/50 text-slate-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between pt-4">
-                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Amount</span>
-                   {isSessionLoading ? (
-                     <div className="flex items-center gap-2 text-slate-400">
-                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-500/40 border-t-slate-200" />
-                       <span className="text-sm font-medium">Loading amount…</span>
-                     </div>
-                   ) : (
-                     <p className="text-2xl font-bold text-white">
-                       ₹{session ? (session.amountCents / 100).toLocaleString('en-IN') : '—'}
-                     </p>
-                   )}
-                </div>
-                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                </div>
-              </div>
-            </div>
 
-            {/* Action Button */}
-            <button
-              type="button"
-              onClick={() => void startPayment()}
-              disabled={!session || status !== 'ready'}
-              className="group relative mt-8 w-full overflow-hidden rounded-2xl py-4 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
-            >
-              <div className="absolute inset-0 bg-rose-600 transition-colors group-hover:bg-rose-500" />
-              <div className="relative flex items-center justify-center gap-3">
-                {status === 'processing' ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                ) : (
-                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                {error ? (
+                  <div className="mt-6 flex flex-col gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4">
+                    <span className="text-xs font-bold uppercase tracking-wider text-rose-500">Transaction Error</span>
+                    <p className="text-sm text-rose-200/80 leading-relaxed">{error}</p>
+                  </div>
+                ) : null}
+
+                {/* Order Details Card */}
+                {!error && (
+                  <div className="mt-8 rounded-2xl border border-slate-700/50 bg-[#0F172A]/40 p-5">
+                    <div className="flex items-center justify-between border-b border-slate-700/50 pb-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Item Details</span>
+                        <p className="text-sm font-medium text-slate-200">
+                          {session?.description ?? 'Loading session…'}
+                        </p>
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/50 text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-4">
+                       <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Amount</span>
+                        <p className="text-2xl font-bold text-white">
+                          ₹{session ? (session.amountCents / 100).toLocaleString('en-IN') : '—'}
+                        </p>
+                      </div>
+                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                      </div>
+                    </div>
+                  </div>
                 )}
-                <span className="text-base font-bold text-white">
-                  {status === 'processing'
-                    ? 'Processing…'
-                    : isSessionLoading
-                      ? 'Preparing…'
-                      : 'Proceed to Pay'}
-                </span>
+
+                {/* Action Button */}
+                {!error && (
+                  <button
+                    type="button"
+                    onClick={() => void startPayment()}
+                    disabled={!session || status !== 'ready'}
+                    className="group relative mt-8 w-full overflow-hidden rounded-2xl py-4 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+                  >
+                    <div className="absolute inset-0 bg-rose-600 transition-colors group-hover:bg-rose-500" />
+                    <div className="relative flex items-center justify-center gap-3">
+                      {status === 'processing' ? (
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      ) : (
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                      )}
+                      <span className="text-base font-bold text-white">
+                        {status === 'processing'
+                          ? 'Processing…'
+                          : 'Proceed to Pay'}
+                      </span>
+                    </div>
+                  </button>
+                )}
+
+                {/* Footer Trust */}
+                <div className="mt-8 flex items-center justify-center gap-6 opacity-40 grayscale transition-all hover:opacity-100 hover:grayscale-0">
+                   <Image
+                     src="https://razorpay.com/assets/razorpay-logo.svg"
+                     alt="Razorpay"
+                     width={80}
+                     height={16}
+                     unoptimized
+                     className="h-4 w-auto"
+                   />
+                   <div className="h-4 w-px bg-slate-700" />
+                   <div className="flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">PCI DSS Compliant</span>
+                   </div>
+                </div>
               </div>
-            </button>
-
-            {/* Footer Trust */}
-            <div className="mt-8 flex items-center justify-center gap-6 opacity-40 grayscale transition-all hover:opacity-100 hover:grayscale-0">
-               <Image
-                 src="https://razorpay.com/assets/razorpay-logo.svg"
-                 alt="Razorpay"
-                 width={80}
-                 height={16}
-                 unoptimized
-                 className="h-4 w-auto"
-               />
-               <div className="h-4 w-px bg-slate-700" />
-               <div className="flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">PCI DSS Compliant</span>
-               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Cancel Button */}
-        <button 
-          onClick={() => window.location.href = deepLinkFailed}
-          className="text-center text-sm font-medium text-slate-500 hover:text-slate-300 transition-colors"
-        >
-          Cancel and return to app
-        </button>
+            {/* Cancel Button */}
+            <button 
+              onClick={() => window.location.href = deepLinkFailed}
+              className="text-center text-sm font-medium text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              Cancel and return to app
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
