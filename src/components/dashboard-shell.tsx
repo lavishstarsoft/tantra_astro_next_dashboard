@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 import { SignOutButton } from '@/components/sign-out-button';
 import { cn } from '@/lib/utils';
@@ -102,7 +103,6 @@ export function DashboardShell({ email, children }: { email: string; children: R
       .sort((a, b) => b.href.length - a.href.length)
       .find((item) => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href)))
       ?.href ?? '/dashboard';
-  const activeNav = nav.find((item) => item.href === activeHref) ?? nav[0];
   const userName = email.split('@')[0];
 
   useEffect(() => {
@@ -136,9 +136,11 @@ export function DashboardShell({ email, children }: { email: string; children: R
               'flex items-center overflow-hidden rounded-xl border border-slate-200 bg-white',
               isSidebarOpen ? 'h-11 w-[184px] justify-start px-2' : 'h-11 w-11 justify-center'
             )}>
-            <img
+            <Image
               src="/thantra-logo.png"
               alt="Thantra LMS"
+              width={36}
+              height={36}
               className={cn('rounded-lg object-cover', isSidebarOpen ? 'h-7 w-7' : 'h-9 w-9')}
             />
             {isSidebarOpen ? <span className="ml-2 text-sm font-semibold text-slate-700">Thantra LMS</span> : null}

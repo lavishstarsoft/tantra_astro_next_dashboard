@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
 
@@ -94,7 +95,7 @@ export default async function VideosListPage({
 
   const skip = (currentPage - 1) * perPage;
 
-  const [videos, totalCount, individualCount, packCount, categories] = await Promise.all([
+  const [videos, totalCount, categories] = await Promise.all([
     prisma.video.findMany({
       where: where as object,
       include: { category: true, packItems: true },
@@ -103,8 +104,6 @@ export default async function VideosListPage({
       skip,
     }),
     prisma.video.count({ where: where as object }),
-    prisma.video.count({ where: { ...(where as object), packItems: { none: {} } } }),
-    prisma.video.count({ where: { ...(where as object), packItems: { some: {} } } }),
     prisma.category.findMany({ orderBy: { sortOrder: 'asc' }, select: { id: true, name: true } }),
   ]);
 
@@ -133,7 +132,9 @@ export default async function VideosListPage({
 
   return (
     <div className="space-y-6">
-      <VideosListToast />
+      <Suspense fallback={null}>
+        <VideosListToast />
+      </Suspense>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-slate-800">Videos</h1>

@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 import { ToastMessage } from '@/components/ui/toast-message';
 
@@ -318,9 +319,12 @@ export default function EditVideoPage() {
             </div>
           ) : null}
           {thumbnailUrl ? (
-            <img
+            <Image
               src={thumbnailUrl}
               alt="Thumbnail preview"
+              width={160}
+              height={96}
+              unoptimized
               className="mt-2 h-24 w-40 rounded-lg border border-slate-200 object-cover"
             />
           ) : (

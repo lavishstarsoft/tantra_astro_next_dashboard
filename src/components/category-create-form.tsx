@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import Image from 'next/image';
 
 import { ToastMessage } from '@/components/ui/toast-message';
 
@@ -132,9 +133,12 @@ export function CategoryCreateForm() {
               </div>
               <div>
                 {(thumbnailPreview || thumbnailUrl) ? (
-                  <img
+                  <Image
                     src={thumbnailPreview || thumbnailUrl}
                     alt="Category thumbnail preview"
+                    width={128}
+                    height={80}
+                    unoptimized
                     className="mt-2 h-20 w-32 rounded-lg border border-slate-200 object-cover"
                   />
                 ) : null}

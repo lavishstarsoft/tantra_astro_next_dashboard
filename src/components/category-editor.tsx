@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import Image from 'next/image';
 
 import { ToastMessage } from '@/components/ui/toast-message';
 
@@ -44,7 +45,7 @@ export function CategoryEditor({ category }: { category: Cat }) {
       if (thumbnailFile) {
         try {
           finalThumbnailUrl = await uploadFile(thumbnailFile);
-        } catch (err) {
+        } catch {
           setStatus('Upload failed');
           setToast({ text: 'Thumbnail upload failed', kind: 'error' });
           setLoading(false);
@@ -135,9 +136,12 @@ export function CategoryEditor({ category }: { category: Cat }) {
                   }}
                 />
                 {(thumbnailPreview || thumbnailUrl) ? (
-                  <img
+                  <Image
                     src={thumbnailPreview || thumbnailUrl}
                     alt={`${name} thumbnail`}
+                    width={64}
+                    height={40}
+                    unoptimized
                     className="h-10 w-16 rounded object-cover border border-slate-200"
                   />
                 ) : (
@@ -148,9 +152,12 @@ export function CategoryEditor({ category }: { category: Cat }) {
               <>
                 <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">{packPriceLabel}</span>
                 {thumbnailUrl ? (
-                  <img
+                  <Image
                     src={thumbnailUrl}
                     alt={`${name} thumbnail`}
+                    width={64}
+                    height={40}
+                    unoptimized
                     className="h-10 w-16 rounded object-cover border border-slate-200"
                   />
                 ) : (

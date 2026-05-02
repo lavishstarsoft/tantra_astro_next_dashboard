@@ -2,6 +2,7 @@
 
 import Script from 'next/script';
 import { use, useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 
 type SessionPayload = {
   ok: true;
@@ -240,7 +241,14 @@ export default function PayPage({ searchParams }: { searchParams: Promise<{ toke
 
             {/* Footer Trust */}
             <div className="mt-8 flex items-center justify-center gap-6 opacity-40 grayscale transition-all hover:opacity-100 hover:grayscale-0">
-               <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" className="h-4" />
+               <Image
+                 src="https://razorpay.com/assets/razorpay-logo.svg"
+                 alt="Razorpay"
+                 width={80}
+                 height={16}
+                 unoptimized
+                 className="h-4 w-auto"
+               />
                <div className="h-4 w-px bg-slate-700" />
                <div className="flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>

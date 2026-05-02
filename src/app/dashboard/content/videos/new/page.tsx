@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 import { ToastMessage } from '@/components/ui/toast-message';
 
@@ -205,9 +206,12 @@ export default function NewVideoPage() {
         </div>
         <div className="xl:col-span-3">
           {(thumbnailPreview || thumbnailUrl) ? (
-            <img
+            <Image
               src={thumbnailPreview || thumbnailUrl}
               alt="Thumbnail preview"
+              width={160}
+              height={96}
+              unoptimized
               className="mt-2 h-24 w-40 rounded-lg border border-slate-200 object-cover"
             />
           ) : (
