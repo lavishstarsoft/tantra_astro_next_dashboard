@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 
@@ -21,7 +21,7 @@ declare global {
   }
 }
 
-function CheckoutForm() {
+export default function CheckoutForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
   
@@ -264,5 +264,3 @@ function CheckoutForm() {
     </div>
   );
 }
-
-export default function CheckoutForm() {
