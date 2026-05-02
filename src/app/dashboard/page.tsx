@@ -3,16 +3,18 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 
 export default async function DashboardHomePage() {
-  const [videoCount, published, categories, orders, revenue] = await Promise.all([
+  const [videoCount, published, categories, purchasesCount, revenue] = await Promise.all([
     prisma.video.count(),
     prisma.video.count({ where: { published: true } }),
     prisma.category.count(),
-    prisma.order.count({ where: { status: 'completed' } }),
-    prisma.order.aggregate({
+    prisma.purchase.count({ where: { status: 'completed' } }),
+    prisma.purchase.aggregate({
       where: { status: 'completed' },
       _sum: { amountTotalCents: true },
     }),
   ]);
+
+  const orders = purchasesCount;
 
   const rupees = ((revenue._sum.amountTotalCents ?? 0) / 100).toLocaleString('en-IN', {
     style: 'currency',

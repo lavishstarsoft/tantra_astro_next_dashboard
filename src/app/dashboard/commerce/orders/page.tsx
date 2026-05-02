@@ -57,18 +57,20 @@ export default async function OrdersPage() {
               purchases.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3 text-slate-600">
-                    {p.createdAt.toISOString().slice(0, 10)}
+                    {p.createdAt instanceof Date ? p.createdAt.toISOString().slice(0, 10) : '—'}
                     <br />
-                    <span className="text-[10px] opacity-50">{p.createdAt.toISOString().slice(11, 19)}</span>
+                    <span className="text-[10px] opacity-50">
+                      {p.createdAt instanceof Date ? p.createdAt.toISOString().slice(11, 19) : ''}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-slate-700">{p.user.name}</p>
-                    <p className="text-xs text-slate-500">{p.user.email}</p>
+                    <p className="font-medium text-slate-700">{p.user?.name ?? 'Unknown'}</p>
+                    <p className="text-xs text-slate-500">{p.user?.email ?? '—'}</p>
                   </td>
                   <td className="px-4 py-3 text-slate-700 font-semibold">
                     {(p.amountTotalCents / 100).toLocaleString('en-IN', {
                       style: 'currency',
-                      currency: p.currency.toUpperCase(),
+                      currency: (p.currency || 'INR').toUpperCase(),
                     })}
                   </td>
                   <td className="px-4 py-3">
