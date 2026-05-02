@@ -54,6 +54,16 @@ export async function POST(req: Request) {
       const now = Date.now();
       accessExpiresAt = new Date(now + validityDays * 24 * 60 * 60 * 1000);
     }
+  } else if (purchase.kind === 'category') {
+    const category = await prisma.category.findUnique({
+      where: { id: purchase.targetId },
+      select: { accessValidityDays: true },
+    });
+    const validityDays = Math.max(0, category?.accessValidityDays ?? 0);
+    if (validityDays > 0) {
+      const now = Date.now();
+      accessExpiresAt = new Date(now + validityDays * 24 * 60 * 60 * 1000);
+    }
   }
 
   await prisma.purchase.update({

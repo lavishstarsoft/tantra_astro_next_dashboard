@@ -10,6 +10,7 @@ type Cat = {
   id: string;
   name: string;
   packPriceLabel: string;
+  accessValidityDays: number;
   thumbnailUrl?: string;
   _count: { videos: number; packItems: number };
 };
@@ -18,6 +19,7 @@ export function CategoryEditor({ category }: { category: Cat }) {
   const router = useRouter();
   const [name, setName] = useState(category.name);
   const [packPriceLabel, setPackPriceLabel] = useState(category.packPriceLabel);
+  const [accessValidityDays, setAccessValidityDays] = useState(category.accessValidityDays);
   const [thumbnailUrl, setThumbnailUrl] = useState(category.thumbnailUrl ?? '');
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -57,7 +59,12 @@ export function CategoryEditor({ category }: { category: Cat }) {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, packPriceLabel, thumbnailUrl: finalThumbnailUrl }),
+        body: JSON.stringify({ 
+          name, 
+          packPriceLabel, 
+          accessValidityDays: Number(accessValidityDays),
+          thumbnailUrl: finalThumbnailUrl 
+        }),
       });
       if (!res.ok) {
         setStatus('Save failed');
@@ -117,11 +124,24 @@ export function CategoryEditor({ category }: { category: Cat }) {
           <div className="space-y-2">
             {isEditing ? (
               <>
-                <input
-                  className="w-full min-w-[100px] rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700"
-                  value={packPriceLabel}
-                  onChange={(e) => setPackPriceLabel(e.target.value)}
-                />
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Price Label</label>
+                  <input
+                    className="w-full min-w-[100px] rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700"
+                    value={packPriceLabel}
+                    onChange={(e) => setPackPriceLabel(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Validity (Days)</label>
+                  <input
+                    type="number"
+                    className="w-full min-w-[100px] rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700"
+                    value={accessValidityDays}
+                    onChange={(e) => setAccessValidityDays(Number(e.target.value))}
+                  />
+                  <p className="text-[10px] text-slate-400">0 = Lifetime</p>
+                </div>
                 <input
                   type="file"
                   accept="image/*"
@@ -149,8 +169,11 @@ export function CategoryEditor({ category }: { category: Cat }) {
                 )}
               </>
             ) : (
-              <>
-                <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">{packPriceLabel}</span>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">{packPriceLabel}</span>
+                  <span className="text-xs text-slate-500">{accessValidityDays === 0 ? 'Lifetime' : `${accessValidityDays}d`}</span>
+                </div>
                 {thumbnailUrl ? (
                   <Image
                     src={thumbnailUrl}
@@ -163,7 +186,7 @@ export function CategoryEditor({ category }: { category: Cat }) {
                 ) : (
                   <span className="text-xs text-slate-400">No thumbnail</span>
                 )}
-              </>
+              </div>
             )}
           </div>
         </td>
@@ -186,6 +209,7 @@ export function CategoryEditor({ category }: { category: Cat }) {
                   onClick={() => {
                     setName(category.name);
                     setPackPriceLabel(category.packPriceLabel);
+                    setAccessValidityDays(category.accessValidityDays);
                     setThumbnailUrl(category.thumbnailUrl ?? '');
                     setThumbnailFile(null);
                     setThumbnailPreview(null);

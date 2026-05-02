@@ -16,6 +16,7 @@ function parseAmountFromLabel(label?: string): number | null {
 const createSchema = z.object({
   name: z.string().min(1).max(120),
   packPriceLabel: z.string().min(1),
+  accessValidityDays: z.number().int().min(0).default(0),
   thumbnailUrl: z.string().optional(),
 });
 
@@ -57,6 +58,7 @@ export async function POST(req: Request) {
       data: {
         name: body.name.trim(),
         packPriceLabel: body.packPriceLabel.trim(),
+        accessValidityDays: body.accessValidityDays,
         thumbnailUrl: body.thumbnailUrl?.trim() ?? '',
         checkoutAmountCents: parseAmountFromLabel(body.packPriceLabel) ?? 799_900,
         sortOrder,

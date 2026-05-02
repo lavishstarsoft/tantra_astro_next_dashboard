@@ -45,7 +45,8 @@ export type PublicCatalogPayload = {
   videosByCategory: Record<string, PublicCategoryRow[]>;
   categoryThumbnailUrlByName: Record<string, string>;
   categoryPackTotalPrice: Record<string, string>;
-  videoAccessByTitle: Record<string, { category: string; isFree: boolean }>;
+  categoryValidityByName: Record<string, number>;
+  videoAccessByTitle: Record<string, { category: string; isFree: boolean; accessValidityDays: number }>;
   homeConfig: {
     recommendedVideoTitles: string[];
     featuredCategories: string[];
@@ -66,8 +67,6 @@ function absoluteUrl(pathOrUrl: string): string {
     let normalizedRemote = pathOrUrl;
     try {
       const parsed = new URL(pathOrUrl);
-      // Unwrap existing proxy URLs saved in old rows:
-      // http://<app>/api/public/image?url=<remote>
       if (parsed.pathname === '/api/public/image') {
         const embedded = parsed.searchParams.get('url');
         if (embedded) {
@@ -80,8 +79,6 @@ function absoluteUrl(pathOrUrl: string): string {
 
     try {
       const parsed = new URL(normalizedRemote);
-      // Some rows may have old URLs like https://<public>.r2.dev/<bucket>/uploads/...
-      // when the public domain is already bucket-scoped. Strip the bucket prefix for r2.dev hosts.
       if (parsed.hostname.endsWith('.r2.dev') && bucket) {
         const prefixed = `/${bucket}/`;
         if (parsed.pathname.startsWith(prefixed)) {
@@ -93,8 +90,6 @@ function absoluteUrl(pathOrUrl: string): string {
       normalizedRemote = normalizedRemote;
     }
 
-    // Cloudflare R2 API endpoints are often not publicly readable.
-    // Serve through our public proxy so mobile app always gets a displayable image URL.
     if (normalizedRemote.includes('.r2.cloudflarestorage.com') && base) {
       return `${base}/api/public/image?url=${encodeURIComponent(normalizedRemote)}`;
     }
@@ -164,8 +159,10 @@ export async function buildPublicCatalogPayload(): Promise<PublicCatalogPayload>
   const videosByCategory: Record<string, PublicCategoryRow[]> = {};
   const categoryThumbnailUrlByName: Record<string, string> = {};
   const categoryPackTotalPrice: Record<string, string> = {};
+  const categoryValidityByName: Record<string, number> = {};
   for (const c of categories) {
     categoryPackTotalPrice[c.name] = c.packPriceLabel;
+    categoryValidityByName[c.name] = c.accessValidityDays;
     videosByCategory[c.name] = [];
     categoryThumbnailUrlByName[c.name] = absoluteUrl(c.thumbnailUrl);
   }
@@ -189,11 +186,12 @@ export async function buildPublicCatalogPayload(): Promise<PublicCatalogPayload>
     }));
   }
 
-  const videoAccessByTitle: Record<string, { category: string; isFree: boolean }> = {};
+  const videoAccessByTitle: Record<string, { category: string; isFree: boolean; accessValidityDays: number }> = {};
   for (const v of videos) {
     videoAccessByTitle[v.title] = {
       category: v.category.name,
       isFree: v.isFree,
+      accessValidityDays: v.accessValidityDays,
     };
   }
 
@@ -224,6 +222,7 @@ export async function buildPublicCatalogPayload(): Promise<PublicCatalogPayload>
     videosByCategory,
     categoryThumbnailUrlByName,
     categoryPackTotalPrice,
+    categoryValidityByName,
     videoAccessByTitle,
     homeConfig: {
       recommendedVideoTitles: recommendedVideoTitles.filter((title) => title in catalog),

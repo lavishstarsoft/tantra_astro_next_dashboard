@@ -11,6 +11,7 @@ export function CategoryCreateForm() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [packPriceLabel, setPackPriceLabel] = useState('₹999');
+  const [accessValidityDays, setAccessValidityDays] = useState(0);
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -48,7 +49,12 @@ export function CategoryCreateForm() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, packPriceLabel, thumbnailUrl: finalThumbnailUrl }),
+        body: JSON.stringify({ 
+          name, 
+          packPriceLabel, 
+          accessValidityDays: Number(accessValidityDays),
+          thumbnailUrl: finalThumbnailUrl 
+        }),
       });
       const data = (await res.json()) as { error?: unknown };
       if (!res.ok) {
@@ -58,6 +64,7 @@ export function CategoryCreateForm() {
       }
       setName('');
       setPackPriceLabel('₹999');
+      setAccessValidityDays(0);
       setThumbnailUrl('');
       setThumbnailFile(null);
       setThumbnailPreview(null);
@@ -105,15 +112,27 @@ export function CategoryCreateForm() {
                   required
                 />
               </div>
-              <div>
-                <label className="text-xs font-medium text-slate-600">Pack label</label>
-                <input
-                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                  value={packPriceLabel}
-                  onChange={(e) => setPackPriceLabel(e.target.value)}
-                  placeholder="₹999"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-slate-600">Pack label</label>
+                  <input
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    value={packPriceLabel}
+                    onChange={(e) => setPackPriceLabel(e.target.value)}
+                    placeholder="₹999"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600">Validity (Days)</label>
+                  <input
+                    type="number"
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    value={accessValidityDays}
+                    onChange={(e) => setAccessValidityDays(Number(e.target.value))}
+                    placeholder="0 = Lifetime"
+                  />
+                </div>
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-600">Thumbnail upload</label>

@@ -119,6 +119,7 @@ model Category {
    * INR in paise for Stripe Checkout when no Price ID is configured
    */
   checkoutAmountCents Int                @default(799900)
+  accessValidityDays  Int                @default(0)
   sortOrder           Int                @default(0)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt

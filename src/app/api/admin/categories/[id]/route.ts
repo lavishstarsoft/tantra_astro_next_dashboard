@@ -17,6 +17,7 @@ const patchSchema = z
   .object({
     name: z.string().min(1).optional(),
     packPriceLabel: z.string().min(1).optional(),
+    accessValidityDays: z.number().int().min(0).optional(),
     thumbnailUrl: z.string().optional(),
     sortOrder: z.number().int().optional(),
   })
@@ -42,7 +43,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const data = { ...parsed.data } as { packPriceLabel?: string; sortOrder?: number; checkoutAmountCents?: number };
+  const data = { ...parsed.data } as any;
   if (data.packPriceLabel) {
     data.checkoutAmountCents = parseAmountFromLabel(data.packPriceLabel) ?? 799_900;
   }

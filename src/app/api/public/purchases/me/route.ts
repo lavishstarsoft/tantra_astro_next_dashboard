@@ -35,8 +35,14 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    purchasedVideos: videos.map((v) => v.title),
-    purchasedCategories: categories.map((c) => c.name),
+    purchasedVideos: videos.map((v) => {
+      const p = purchases.find((p) => p.kind === 'video' && p.targetId === v.id);
+      return { title: v.title, expiresAt: p?.accessExpiresAt };
+    }),
+    purchasedCategories: categories.map((c) => {
+      const p = purchases.find((p) => p.kind === 'category' && p.targetId === c.id);
+      return { name: c.name, expiresAt: p?.accessExpiresAt };
+    }),
   });
 }
 
