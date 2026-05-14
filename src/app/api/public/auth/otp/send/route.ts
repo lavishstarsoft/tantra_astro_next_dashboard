@@ -54,6 +54,11 @@ export async function POST(req: Request) {
     );
   }
 
+  // Razorpay Approval Bypass: Skip real SMS for static numbers
+  if (phoneE164 === '+919876543210' || phoneE164 === '+919949527339') {
+    return NextResponse.json({ ok: true, debug: 'Static bypass active' });
+  }
+
   try {
     await sendOtpSms(phoneE164, otp);
     const created = await prisma.appOtpCode.create({

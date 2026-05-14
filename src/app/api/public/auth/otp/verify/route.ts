@@ -46,6 +46,44 @@ export async function POST(req: Request) {
   const phoneE164 = normalizePhone(parsed.data.phone);
   const now = new Date();
 
+  // Razorpay Approval Bypass: Static Phone & OTP
+  if ((phoneE164 === '+919876543210' || phoneE164 === '+919949527339') && otp === '123456') {
+    const user = await prisma.appUser.upsert({
+      where: { phone: phoneE164 },
+      update: { name: 'Razorpay Tester' },
+      create: {
+        phone: phoneE164,
+        name: 'Razorpay Tester',
+        email: 'tester@razorpay.com'
+      },
+    });
+
+    const deviceId = parsed.data.deviceId?.trim() || 'razorpay-test-device';
+    const accessToken = await signAppAccessToken({
+      sub: user.id,
+      phone: user.phone,
+      email: user.email,
+      name: user.name,
+      deviceId,
+    });
+    const refreshToken = await signAppRefreshToken(user.id);
+    const refreshTokenHash = hashToken(refreshToken);
+    const refreshExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    await prisma.appSession.upsert({
+      where: { userId_deviceId: { userId: user.id, deviceId } },
+      update: { refreshTokenHash, expiresAt: refreshExpiresAt, revokedAt: null },
+      create: { userId: user.id, deviceId, refreshTokenHash, expiresAt: refreshExpiresAt },
+    });
+
+    return NextResponse.json({
+      ok: true,
+      user: { id: user.id, phone: user.phone, name: user.name, email: user.email },
+      accessToken,
+      refreshToken,
+    });
+  }
+
   if (process.env.NODE_ENV === 'development') {
     console.log('[otp.verify] incoming', { phoneRaw: parsed.data.phone, phoneNormalized: phoneE164, now });
   }
