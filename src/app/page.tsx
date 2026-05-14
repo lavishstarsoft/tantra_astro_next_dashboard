@@ -5,12 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, Variants } from 'framer-motion';
 import { 
-  Search, 
   Star, 
-  ChevronRight, 
-  Info,
-  Calendar,
-  Users,
   Award,
   Video
 } from 'lucide-react';
@@ -23,7 +18,6 @@ import Footer from '@/components/Footer';
  */
 
 export default function LandingPage() {
-  const [activeTab, setActiveTab] = useState('All');
 
   const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 30 },
@@ -115,7 +109,7 @@ export default function LandingPage() {
             
             <div className="space-y-8">
               <p className="text-white/70 text-lg leading-relaxed">
-                AstroTantra Academy is India's leading digital platform for professional metaphysical education. We bridge the gap between ancient Vedic wisdom and modern structured learning.
+                AstroTantra Academy is India&apos;s leading digital platform for professional metaphysical education. We bridge the gap between ancient Vedic wisdom and modern structured learning.
               </p>
               <p className="text-white/50 text-sm leading-relaxed max-w-2xl mx-auto italic">
                 Our mission is to empower seekers with authentic knowledge through high-definition video modules, interactive quizzes, and industry-recognized certification paths.

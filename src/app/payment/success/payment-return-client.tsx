@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 
 export function PaymentReturnClient() {
   const searchParams = useSearchParams();
@@ -55,7 +56,7 @@ export function PaymentReturnClient() {
       <div className="mx-auto flex max-w-lg flex-col items-center px-4 pt-16 pb-10 text-center">
         {/* Logo */}
         <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1E293B] border border-slate-700 shadow-xl overflow-hidden">
-           <img src="/logo.png" alt="Logo" className="h-full w-full object-contain p-2" />
+           <Image src="/logo.png" alt="Logo" width={64} height={64} className="h-full w-full object-contain p-2" />
         </div>
 
         {/* Status Icon */}

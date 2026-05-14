@@ -13,7 +13,7 @@ export default function ContactUs() {
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-extrabold text-[#1A2230] mb-4">Contact Us</h1>
             <p className="text-lg text-[#4C5A70] max-w-2xl mx-auto">
-              Have questions about our courses or need technical support? We're here to help you every step of the way.
+              Have questions about our courses or need technical support? We&apos;re here to help you every step of the way.
             </p>
           </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { GraduationCap, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -26,7 +26,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-slate-400 text-lg leading-relaxed max-w-sm">
-              The world's leading destination for authentic spiritual education and metaphysical mastery.
+              The world&apos;s leading destination for authentic spiritual education and metaphysical mastery.
             </p>
             <div className="flex items-center space-x-4">
               {['FB', 'IG', 'TW', 'YT'].map((s) => (

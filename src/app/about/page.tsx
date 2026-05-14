@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Info, Target, Users, Sparkles } from 'lucide-react';
+import { Target, Users, Sparkles } from 'lucide-react';
 
 export default function AboutUs() {
   return (
@@ -45,7 +45,7 @@ export default function AboutUs() {
             </div>
             <h3 className="text-xl font-bold text-slate-900 mb-4">Our Vision</h3>
             <p className="text-slate-600 leading-relaxed">
-              To become the world's leading destination for occult and spiritual education, powered by technology and tradition.
+              To become the world&apos;s leading destination for occult and spiritual education, powered by technology and tradition.
             </p>
           </div>
 

@@ -7,12 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, 
   X, 
-  Search, 
   Phone, 
-  Mail, 
-  User, 
-  GraduationCap,
-  ChevronDown
+  Mail
 } from 'lucide-react';
 
 export default function Navbar() {

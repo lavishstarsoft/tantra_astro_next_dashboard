@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const updatedPurchase = await prisma.purchase.update({
+  await prisma.purchase.update({
     where: { id: purchase.id },
     data: {
       status: 'completed',

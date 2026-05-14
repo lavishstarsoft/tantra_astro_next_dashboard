@@ -52,7 +52,7 @@ export function SendNotificationForm({
       toast.success('Notification sent successfully!');
       setTitle('');
       setBody('');
-    } catch (err) {
+    } catch {
       toast.error('Failed to send notification');
     } finally {
       setLoading(false);
