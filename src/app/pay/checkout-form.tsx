@@ -65,7 +65,7 @@ export default function CheckoutForm() {
           return;
         }
         setSession(json as SessionPayload);
-      } catch (e) {
+      } catch (_e) {
         if (isMounted) setError('Network error');
       }
     })();
@@ -88,7 +88,7 @@ export default function CheckoutForm() {
         contact: session.customer?.contact ?? '',
       },
       theme: { color: '#8F3D66' },
-      handler: async (response: any) => {
+      handler: async (response: Record<string, unknown>) => {
         try {
           const res = await fetch('/api/public/payments/razorpay/verify', {
             method: 'POST',
