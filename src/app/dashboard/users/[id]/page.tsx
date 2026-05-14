@@ -108,11 +108,11 @@ export default async function RegisteredUserDetailPage({
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           <p className="text-sm text-slate-600">
             <span className="font-medium text-slate-700">Registered:</span>{' '}
-            {new Date(user.createdAt).toLocaleString('en-IN')}
+            {new Date(user.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
           </p>
           <p className="text-sm text-slate-600">
             <span className="font-medium text-slate-700">Last updated:</span>{' '}
-            {new Date(user.updatedAt).toLocaleString('en-IN')}
+            {new Date(user.updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
           </p>
         </div>
       </section>
@@ -142,7 +142,7 @@ export default async function RegisteredUserDetailPage({
             ) : (
               user.purchases.map((purchase) => (
                 <tr key={purchase.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 text-slate-600">{new Date(purchase.createdAt).toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 text-slate-600">{new Date(purchase.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
                   <td className="px-4 py-3 text-slate-700">{purchase.kind}</td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-500">{purchase.targetId}</td>
                   <td className="px-4 py-3 text-slate-700">{formatAmount(purchase.amountTotalCents, purchase.currency)}</td>
@@ -190,10 +190,10 @@ export default async function RegisteredUserDetailPage({
             ) : (
               user.paymentSessions.map((session) => (
                 <tr key={session.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 text-slate-600">{new Date(session.createdAt).toLocaleString('en-IN')}</td>
+                   <td className="px-4 py-3 text-slate-600">{new Date(session.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
                   <td className="px-4 py-3 text-slate-700">{session.kind}</td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-500">{session.targetId}</td>
-                  <td className="px-4 py-3 text-slate-600">{new Date(session.expiresAt).toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 text-slate-600">{new Date(session.expiresAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-500">{session.token.slice(0, 20)}...</td>
                 </tr>
               ))

@@ -66,10 +66,20 @@ export default async function OrdersPage() {
               purchases.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3 text-slate-600">
-                    {p.createdAt instanceof Date ? p.createdAt.toISOString().slice(0, 10) : '—'}
+                    {p.createdAt instanceof Date 
+                      ? p.createdAt.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }) 
+                      : '—'}
                     <br />
                     <span className="text-[10px] opacity-50">
-                      {p.createdAt instanceof Date ? p.createdAt.toISOString().slice(11, 19) : ''}
+                      {p.createdAt instanceof Date 
+                        ? p.createdAt.toLocaleTimeString('en-IN', { 
+                            timeZone: 'Asia/Kolkata', 
+                            hour: '2-digit', 
+                            minute: '2-digit', 
+                            second: '2-digit',
+                            hour12: true 
+                          }) 
+                        : ''}
                     </span>
                   </td>
                   <td className="px-4 py-3">
