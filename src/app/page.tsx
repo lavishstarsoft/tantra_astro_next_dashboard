@@ -64,19 +64,13 @@ export default function LandingPage() {
                 </p>
               </motion.div>
 
-              <motion.div variants={fadeInUp} className="flex gap-4">
+              <motion.div variants={fadeInUp}>
                 <Link 
                   href="/login" 
                   className="inline-block px-10 py-4 bg-[#E69E3D] text-[#0A111A] rounded-md font-black uppercase tracking-widest text-xs hover:bg-white transition-all shadow-xl shadow-[#E69E3D]/10"
                 >
                   Explore Courses
                 </Link>
-                <button 
-                  onClick={() => { throw new Error("Sentry Test Error from AstroTantra Web!"); }}
-                  className="px-6 py-4 border border-white/10 text-white/40 rounded-md text-[10px] uppercase tracking-widest hover:text-white transition-all"
-                >
-                  Test Sentry
-                </button>
               </motion.div>
             </motion.div>
 
