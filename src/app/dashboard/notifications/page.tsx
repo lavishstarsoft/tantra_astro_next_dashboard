@@ -36,8 +36,11 @@ export default async function NotificationsPage() {
 
         <div className="lg:col-span-7">
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
+            <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-800">Recent Sent Notifications</h2>
+              <a href="/dashboard/notifications/all" className="text-sm font-semibold text-sky-600 hover:text-sky-800 transition-colors">
+                View All →
+              </a>
             </div>
             <div className="divide-y divide-slate-100">
               {notifications.map((n) => (
@@ -60,7 +63,7 @@ export default async function NotificationsPage() {
                       <h3 className="mt-2 font-bold text-slate-800">{n.title}</h3>
                       <p className="mt-1 text-sm text-slate-600 leading-relaxed">{n.body}</p>
                       <p className="mt-3 text-[10px] text-slate-400 font-medium uppercase tracking-widest">
-                        {new Date(n.createdAt).toLocaleString('en-IN')}
+                        {new Date(n.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
                       </p>
                     </div>
                   </div>
