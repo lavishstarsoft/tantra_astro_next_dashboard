@@ -39,14 +39,14 @@ export async function POST(req: Request) {
   }
 
   // 3. Parse the event
-  let event: any;
+  let event: Record<string, unknown>;
   try {
     event = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const eventType = event?.event;
+  const eventType = String(event?.event ?? '');
   console.log(`[Webhook] Received event: ${eventType}`);
 
   // 4. Only handle payment.captured events
@@ -54,14 +54,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, message: `Ignored event: ${eventType}` });
   }
 
-  const payment = event?.payload?.payment?.entity;
+  // Extract payment entity from nested payload safely
+  const payload = event?.payload as Record<string, unknown> | undefined;
+  const paymentWrapper = payload?.payment as Record<string, unknown> | undefined;
+  const payment = paymentWrapper?.entity as Record<string, unknown> | undefined;
   if (!payment) {
     console.error('[Webhook] No payment entity in payload');
     return NextResponse.json({ error: 'No payment entity' }, { status: 400 });
   }
 
-  const razorpayOrderId = payment.order_id;
-  const razorpayPaymentId = payment.id;
+  const razorpayOrderId = String(payment.order_id ?? '');
+  const razorpayPaymentId = String(payment.id ?? '');
 
   console.log(`[Webhook] Processing payment: orderId=${razorpayOrderId}, paymentId=${razorpayPaymentId}`);
 

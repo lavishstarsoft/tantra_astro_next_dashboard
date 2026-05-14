@@ -67,7 +67,7 @@ export default function CheckoutForm() {
           return;
         }
         setSession(json as SessionPayload);
-      } catch (_e) {
+      } catch {
         if (isMounted) setError('Network error');
       }
     })();
