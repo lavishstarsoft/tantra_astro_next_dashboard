@@ -141,7 +141,7 @@ export default async function DashboardHomePage() {
             </Link>
           </div>
           <div className="space-y-3">
-            {instructors.map((name, idx) => (
+            {instructors.map((name) => (
               <div key={name} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-700">
