@@ -46,8 +46,11 @@ export async function POST(req: Request) {
   const phoneE164 = normalizePhone(parsed.data.phone);
   const now = new Date();
 
-  // Razorpay Approval Bypass: Static Phone & OTP
-  if ((phoneE164 === '+919876543210' || phoneE164 === '+919949527339') && otp === '123456') {
+  // Razorpay Approval Bypass: Use environment variables instead of hardcoded numbers
+  const testPhones = process.env.TEST_PHONE_NUMBERS?.split(',') || [];
+  const testOtp = process.env.TEST_OTP || '123456';
+
+  if (testPhones.includes(phoneE164) && otp === testOtp) {
     const user = await prisma.appUser.upsert({
       where: { phone: phoneE164 },
       update: { name: 'Razorpay Tester' },

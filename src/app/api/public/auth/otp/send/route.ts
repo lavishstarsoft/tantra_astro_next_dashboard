@@ -40,8 +40,9 @@ export async function POST(req: Request) {
   const otp = generateOtp();
   const expiresAt = new Date(Date.now() + 20 * 60 * 1000);
 
-  // Razorpay Approval Bypass: Skip registration check & real SMS for static numbers
-  if (phoneE164 === '+919876543210' || phoneE164 === '+919949527339') {
+  // Razorpay Approval Bypass: Use environment variables instead of hardcoded numbers
+  const testPhones = process.env.TEST_PHONE_NUMBERS?.split(',') || [];
+  if (testPhones.includes(phoneE164)) {
     return NextResponse.json({ ok: true, debug: 'Static bypass active' });
   }
 
