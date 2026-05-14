@@ -7,7 +7,8 @@ import { motion, Variants } from 'framer-motion';
 import { 
   Star, 
   Award,
-  Video
+  Video,
+  Users
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
