@@ -47,7 +47,7 @@ export default function CheckoutForm() {
 
   useEffect(() => {
     if (!token) {
-      setError('Missing payment token.');
+      setError('Missing token');
       return;
     }
     
@@ -61,11 +61,11 @@ export default function CheckoutForm() {
         if (!isMounted) return;
         const json = await res.json();
         if (!res.ok) {
-          setError(json?.error ?? 'Could not start payment');
+          setError(json?.error ?? 'Error starting payment');
           return;
         }
         setSession(json as SessionPayload);
-      } catch (_e) {
+      } catch (e) {
         if (isMounted) setError('Network error');
       }
     })();
@@ -88,7 +88,7 @@ export default function CheckoutForm() {
         contact: session.customer?.contact ?? '',
       },
       theme: { color: '#8F3D66' },
-      handler: async (response: Record<string, unknown>) => {
+      handler: async (response: any) => {
         try {
           const res = await fetch('/api/public/payments/razorpay/verify', {
             method: 'POST',
@@ -123,27 +123,26 @@ export default function CheckoutForm() {
   }, [session, scriptReady, autoOpened, startPayment]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0F172A] p-6 text-center">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0F172A] pb-24 text-center">
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
         strategy="afterInteractive"
         onLoad={() => setScriptReady(true)}
       />
 
-      {!error ? (
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-500/20 border-t-rose-500" />
-          <p className="text-sm text-slate-400 font-medium">Opening Secure Payment Interface...</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 max-w-xs">
-          <p className="text-sm text-rose-200/80">{error}</p>
+      {error ? (
+        <div className="flex flex-col gap-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 max-w-xs mx-auto">
+          <p className="text-sm text-rose-200/80 font-medium">{error}</p>
           <button 
             onClick={() => window.location.reload()}
             className="text-xs font-bold text-white bg-rose-600 px-4 py-2 rounded-lg"
           >
             Retry
           </button>
+        </div>
+      ) : (
+        <div className="animate-pulse">
+           <div className="h-1.5 w-1.5 rounded-full bg-rose-500" />
         </div>
       )}
     </div>
