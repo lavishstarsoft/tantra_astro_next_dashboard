@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 
 export default async function DashboardHomePage() {
-  const [videoCount, published, categories, purchasesCount, revenue] = await Promise.all([
+  const [videoCount, publishedCount, categoriesCount, purchasesCount, revenue, userCount, latestVideos] = await Promise.all([
     prisma.video.count(),
     prisma.video.count({ where: { published: true } }),
     prisma.category.count(),
@@ -11,6 +11,13 @@ export default async function DashboardHomePage() {
     prisma.purchase.aggregate({
       where: { status: 'completed' },
       _sum: { amountTotalCents: true },
+    }),
+    prisma.appUser.count(),
+    prisma.video.findMany({
+      where: { published: true },
+      take: 4,
+      orderBy: { createdAt: 'desc' },
+      select: { title: true, rating: true, category: { select: { name: true } } }
     }),
   ]);
 
@@ -23,24 +30,21 @@ export default async function DashboardHomePage() {
   });
 
   const cards = [
-    { label: 'Students', value: (videoCount * 412).toLocaleString('en-IN'), hint: 'Active learners' },
-    { label: 'Expert mentors', value: Math.max(categories * 2, 16), hint: 'Certified instructors' },
-    { label: 'Courses', value: videoCount, hint: `${published} published` },
+    { label: 'Students', value: userCount.toLocaleString('en-IN'), hint: 'Registered users' },
+    { label: 'Mentors', value: Math.max(categoriesCount, 1), hint: 'Subject experts' },
+    { label: 'Courses', value: videoCount, hint: `${publishedCount} published` },
     { label: 'Revenue', value: rupees, hint: `${orders} paid orders` },
   ];
 
-  const popularCourses = [
-    { name: 'UI/UX Design', courses: Math.max(categories * 4, 18) },
-    { name: 'Marketing', courses: Math.max(categories * 3, 14) },
-    { name: 'Web Development', courses: Math.max(categories * 5, 22) },
-    { name: 'Mathematics', courses: Math.max(categories * 2, 10) },
-  ];
+  const popularCourses = latestVideos.map(v => ({
+    name: v.title,
+    category: v.category.name,
+    rating: v.rating
+  }));
 
   const instructors = [
-    'Nila Veager',
-    'Theron Trump',
-    'Tyler Mark',
-    'Johen Mark',
+    'Tantra Astro Team',
+    'Vedic Experts',
   ];
 
   return (
@@ -69,11 +73,11 @@ export default async function DashboardHomePage() {
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-xl bg-slate-50 p-3 text-center">
               <p className="text-xs text-slate-500">Course in Progress</p>
-              <p className="mt-1 text-3xl font-semibold text-slate-700">{videoCount - published}</p>
+              <p className="mt-1 text-3xl font-semibold text-slate-700">{videoCount - publishedCount}</p>
             </div>
             <div className="rounded-xl bg-slate-50 p-3 text-center">
-              <p className="text-xs text-slate-500">Forum Discussion</p>
-              <p className="mt-1 text-3xl font-semibold text-slate-700">{categories * 5}</p>
+              <p className="text-xs text-slate-500">Total Categories</p>
+              <p className="mt-1 text-3xl font-semibold text-slate-700">{categoriesCount}</p>
             </div>
           </div>
         </aside>
@@ -92,10 +96,10 @@ export default async function DashboardHomePage() {
               <div key={course.name} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
                 <div>
                   <p className="text-sm font-semibold text-slate-700">{course.name}</p>
-                  <p className="text-xs text-slate-500">{course.courses}+ Courses</p>
+                  <p className="text-xs text-slate-500">{course.category} · {course.rating}★</p>
                 </div>
                 <button type="button" className="rounded-md bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                  View Courses
+                  View
                 </button>
               </div>
             ))}
@@ -145,7 +149,7 @@ export default async function DashboardHomePage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-700">{name}</p>
-                    <p className="text-xs text-slate-500">{idx + 3} Design Course</p>
+                    <p className="text-xs text-slate-500">Certified Mentor</p>
                   </div>
                 </div>
                 <button type="button" className="rounded-md bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600">
