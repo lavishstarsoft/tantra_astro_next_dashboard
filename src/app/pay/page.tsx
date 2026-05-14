@@ -13,17 +13,7 @@ export const viewport = {
 
 export default function PayPage() {
   return (
-    <div className="min-h-screen bg-[#0F172A] font-sans selection:bg-rose-500/30 overflow-hidden touch-none">
-      <style dangerouslySetInnerHTML={{ __html: `
-        html, body {
-          overscroll-behavior: none;
-          overflow: hidden;
-          height: 100%;
-          position: fixed;
-          width: 100%;
-          touch-action: none;
-        }
-      `}} />
+    <div className="min-h-screen bg-[#0F172A] font-sans selection:bg-rose-500/30 overflow-auto">
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-screen">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-700 border-t-rose-500" />
