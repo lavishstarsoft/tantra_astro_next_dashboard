@@ -143,7 +143,13 @@ export default function LandingPage() {
           ].map((course, i) => (
             <Link key={i} href="/login" className="group block bg-[#0A111A] border border-white/5 overflow-hidden hover:border-[#E69E3D]/50 transition-all">
               <div className="relative aspect-video">
-                <Image src={course.image} alt={course.title} fill className="object-cover" />
+                <Image 
+                  src={course.image} 
+                  alt={course.title} 
+                  fill 
+                  className="object-cover" 
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
               </div>
               <div className="p-6 space-y-3">

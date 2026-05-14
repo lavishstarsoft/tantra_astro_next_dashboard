@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
         hostname: 'pub-f35e903402514e0a906601c1b15ddd3b.r2.dev',
       },
     ],
+    formats: ['image/avif', 'image/webp'],
   },
 };
 
