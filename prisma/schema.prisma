@@ -288,3 +288,21 @@ model Notification {
   @@index([userId, read])
   @@index([userId, createdAt])
 }
+
+model InAppMessage {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  body          String
+  imageUrl      String?
+  kind          String   @default("info") // info | update | offer | warning
+  actionKind    String   @default("none") // none | video | category | url
+  actionTarget  String?  // video title, category name, or external URL
+  buttonText    String   @default("Dismiss")
+  active        Boolean  @default(true)
+  targetVersion String?  // Semantic version string (e.g. "1.0.2") or "*" for all
+  platform      String   @default("all") // ios | android | all
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([active])
+}
