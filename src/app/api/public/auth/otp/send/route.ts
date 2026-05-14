@@ -5,8 +5,6 @@ import { prisma } from '@/lib/prisma';
 import { generateOtp, sendOtpSms } from '@/lib/msg91';
 import { normalizePhone } from '@/lib/utils';
 
-export const runtime = 'edge';
-
 const bodySchema = z.object({
   phone: z.string().min(10).max(20),
   purpose: z.enum(['login', 'register']).optional(),

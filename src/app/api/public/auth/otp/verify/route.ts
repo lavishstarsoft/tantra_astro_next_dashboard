@@ -5,8 +5,6 @@ import { prisma } from '@/lib/prisma';
 import { signAppAccessToken, signAppRefreshToken } from '@/lib/app-jwt';
 import { normalizePhone } from '@/lib/utils';
 
-export const runtime = 'edge';
-
 const bodySchema = z.object({
   phone: z.string().min(10).max(20),
   otp: z.string().min(4).max(10),
