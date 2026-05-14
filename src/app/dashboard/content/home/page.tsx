@@ -26,7 +26,7 @@ export default function HomeConfigPage() {
   const [featuredCategories, setFeaturedCategories] = useState<string[]>([]);
   const [showContinueWatching, setShowContinueWatching] = useState(true);
   const [isReviewMode, setIsReviewMode] = useState(false);
-  const [buyButtonText, setBuyButtonText] = useState('Buy Now');
+  const [buyButtonText, setBuyButtonText] = useState('Enroll Now');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -43,7 +43,7 @@ export default function HomeConfigPage() {
     setFeaturedCategories(json.config?.featuredCategories ?? []);
     setShowContinueWatching(json.config?.showContinueWatching ?? true);
     setIsReviewMode(json.config?.isReviewMode ?? false);
-    setBuyButtonText(json.config?.buyButtonText ?? 'Buy Now');
+    setBuyButtonText(json.config?.buyButtonText ?? 'Enroll Now');
   }
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export default function HomeConfigPage() {
                   type="text"
                   value={buyButtonText}
                   onChange={(e) => setBuyButtonText(e.target.value)}
-                  placeholder="e.g. Buy Now, Get Access..."
+                  placeholder="e.g. Enroll Now, Get Access..."
                   className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                 />
                 <span className="text-[10px] text-slate-500 italic">Custom label for transaction buttons when Review Mode is OFF.</span>

@@ -129,6 +129,7 @@ export default async function RegisteredUsersPage({
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Phone</th>
+              <th className="px-4 py-3">Role</th>
               <th className="px-4 py-3">Purchases</th>
               <th className="px-4 py-3">Registered At</th>
               <th className="px-4 py-3">Actions</th>
@@ -140,6 +141,15 @@ export default async function RegisteredUsersPage({
                 <td className="px-4 py-3 font-medium text-slate-700">{user.name}</td>
                 <td className="px-4 py-3 text-slate-600">{user.email}</td>
                 <td className="px-4 py-3 text-slate-600">{user.phone}</td>
+                <td className="px-4 py-3">
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    user.role === 'SUPER_ADMIN' 
+                      ? 'bg-purple-50 text-purple-700' 
+                      : 'bg-slate-50 text-slate-600'
+                  }`}>
+                    {user.role}
+                  </span>
+                </td>
                 <td className="px-4 py-3">
                   <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">
                     {user._count.purchases}

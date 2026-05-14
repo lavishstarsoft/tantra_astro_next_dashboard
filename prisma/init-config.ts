@@ -12,7 +12,7 @@ async function main() {
       featuredCategoryNamesJson: JSON.stringify(['Beginner', 'Prediction']),
       showContinueWatching: true,
       isReviewMode: false,
-      buyButtonText: 'Buy Now',
+      buyButtonText: 'Enroll Now',
     },
   });
   console.log('AppHomeConfig created/updated');

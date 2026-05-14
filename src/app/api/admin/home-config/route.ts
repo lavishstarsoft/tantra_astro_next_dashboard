@@ -43,7 +43,7 @@ export async function GET() {
       featuredCategories,
       showContinueWatching: cfg?.showContinueWatching ?? true,
       isReviewMode: cfg?.isReviewMode ?? false,
-      buyButtonText: cfg?.buyButtonText ?? 'Buy Now',
+      buyButtonText: cfg?.buyButtonText ?? 'Enroll Now',
     },
     options: {
       videos: videos.filter((v) => v.published),
@@ -94,7 +94,7 @@ export async function PATCH(req: Request) {
       featuredCategoryNamesJson: JSON.stringify(Array.from(new Set(body.featuredCategories ?? []))),
       showContinueWatching: body.showContinueWatching ?? true,
       isReviewMode: body.isReviewMode ?? false,
-      buyButtonText: body.buyButtonText ?? 'Buy Now',
+      buyButtonText: body.buyButtonText ?? 'Enroll Now',
     },
   });
 

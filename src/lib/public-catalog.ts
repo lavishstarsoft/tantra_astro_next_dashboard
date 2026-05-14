@@ -229,7 +229,7 @@ export async function buildPublicCatalogPayload(): Promise<PublicCatalogPayload>
       featuredCategories: featuredCategories.filter((name) => name in videosByCategory),
       showContinueWatching: homeConfig?.showContinueWatching ?? true,
       isReviewMode: homeConfig?.isReviewMode ?? false,
-      buyButtonText: homeConfig?.buyButtonText ?? 'Buy Now',
+      buyButtonText: homeConfig?.buyButtonText ?? 'Enroll Now',
     },
   };
 }

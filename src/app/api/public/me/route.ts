@@ -20,6 +20,7 @@ export async function GET(req: Request) {
       dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString() : null,
       gender: user.gender ?? null,
       state: user.state ?? null,
+      role: user.role,
     },
   });
 }
@@ -84,6 +85,7 @@ export async function PATCH(req: Request) {
         dateOfBirth: updated.dateOfBirth ? updated.dateOfBirth.toISOString() : null,
         gender: updated.gender ?? null,
         state: updated.state ?? null,
+        role: updated.role,
       },
     });
   } catch (e) {

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { prisma } from '@/lib/prisma';
+import { UserRoleSwitcher } from '@/components/user-role-switcher';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,6 +94,12 @@ export default async function RegisteredUserDetailPage({
         <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">State</p>
           <p className="mt-2 text-sm font-semibold text-slate-700">{user.state ?? 'Not set'}</p>
+        </article>
+        <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Account Role</p>
+          <div className="mt-2">
+            <UserRoleSwitcher userId={user.id} currentRole={user.role} />
+          </div>
         </article>
       </section>
 
