@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { prisma } from '@/lib/prisma';
 import { signAppAccessToken, signAppRefreshToken } from '@/lib/app-jwt';
+import { normalizePhone } from '@/lib/utils';
 
 export const runtime = 'edge';
 
@@ -13,15 +14,6 @@ const bodySchema = z.object({
   email: z.string().email().optional(),
   deviceId: z.string().min(6).max(200).optional(),
 });
-
-function normalizePhone(phone: string) {
-  const digits = phone.replace(/[^0-9]/g, '');
-  if (digits.length === 10) return `+91${digits}`;
-  if (digits.startsWith('91') && digits.length === 12) return `+${digits}`;
-  if (digits.startsWith('0') && digits.length === 11) return `+91${digits.slice(1)}`;
-  if (phone.startsWith('+') && digits.length >= 10) return `+${digits}`;
-  return `+${digits}`;
-}
 
 async function hashString(input: string) {
   const encoder = new TextEncoder();
