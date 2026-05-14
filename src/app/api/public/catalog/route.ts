@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { buildPublicCatalogPayload } from '@/lib/public-catalog';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 /**
  * Public read-only catalog for mobile / web clients.

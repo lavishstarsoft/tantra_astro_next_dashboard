@@ -1,9 +1,10 @@
-import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { prisma } from '@/lib/prisma';
 import { signAppAccessToken, signAppRefreshToken } from '@/lib/app-jwt';
+
+export const runtime = 'edge';
 
 const bodySchema = z.object({
   phone: z.string().min(10).max(20),
@@ -22,13 +23,16 @@ function normalizePhone(phone: string) {
   return `+${digits}`;
 }
 
-function hashOtp(otp: string) {
-  return crypto.createHash('sha256').update(otp).digest('hex');
+async function hashString(input: string) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function hashToken(token: string) {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
+const hashOtp = hashString;
+const hashToken = hashString;
 
 export async function POST(req: Request) {
   let json: unknown;
@@ -70,7 +74,7 @@ export async function POST(req: Request) {
       deviceId,
     });
     const refreshToken = await signAppRefreshToken(user.id);
-    const refreshTokenHash = hashToken(refreshToken);
+    const refreshTokenHash = await hashToken(refreshToken);
     const refreshExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     await prisma.appSession.upsert({
@@ -139,7 +143,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const otpHash = hashOtp(otp);
+  const otpHash = await hashOtp(otp);
   const matchedOtp = activeOtps.find((entry: { codeHash: string; id: string }) => entry.codeHash === otpHash);
   if (!matchedOtp) {
     return NextResponse.json(
@@ -183,7 +187,7 @@ export async function POST(req: Request) {
     deviceId,
   });
   const refreshToken = await signAppRefreshToken(user.id);
-  const refreshTokenHash = hashToken(refreshToken);
+  const refreshTokenHash = await hashToken(refreshToken);
   const refreshExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
   // Enforce single-device login:

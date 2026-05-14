@@ -1,9 +1,10 @@
-import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { prisma } from '@/lib/prisma';
 import { generateOtp, sendOtpSms } from '@/lib/msg91';
+
+export const runtime = 'edge';
 
 const bodySchema = z.object({
   phone: z.string().min(10).max(20),
@@ -19,8 +20,12 @@ function normalizePhone(phone: string) {
   return `+${digits}`;
 }
 
-function hashOtp(otp: string) {
-  return crypto.createHash('sha256').update(otp).digest('hex');
+async function hashOtp(otp: string) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(otp);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export async function POST(req: Request) {
@@ -83,7 +88,7 @@ export async function POST(req: Request) {
     const created = await prisma.appOtpCode.create({
       data: {
         phone: phoneE164,
-        codeHash: hashOtp(otp),
+        codeHash: await hashOtp(otp),
         expiresAt,
         usedAt: null,
       },
