@@ -37,6 +37,23 @@ export async function POST(req: Request) {
 
   const phoneE164 = normalizePhone(parsed.data.phone);
   const purpose = parsed.data.purpose ?? 'login';
+
+  // Rate Limiting: Check if an OTP was sent to this phone in the last 60 seconds
+  const lastMinute = new Date(Date.now() - 60 * 1000);
+  const recentOtp = await prisma.appOtpCode.findFirst({
+    where: {
+      phone: phoneE164,
+      createdAt: { gte: lastMinute },
+    },
+  });
+
+  if (recentOtp) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait 60 seconds before requesting another OTP.' },
+      { status: 429 }
+    );
+  }
+
   const otp = generateOtp();
   const expiresAt = new Date(Date.now() + 20 * 60 * 1000);
 
