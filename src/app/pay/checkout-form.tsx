@@ -141,8 +141,12 @@ export default function CheckoutForm() {
           </button>
         </div>
       ) : (
-        <div className="animate-pulse">
-           <div className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+        <div className="flex flex-col items-center gap-5">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-500/10 border-t-rose-500" />
+          <div className="flex flex-col gap-1">
+            <p className="text-base font-bold text-white tracking-tight">Securing Payment Interface</p>
+            <p className="text-sm text-slate-500">Please wait while we connect to Razorpay...</p>
+          </div>
         </div>
       )}
     </div>
