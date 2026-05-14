@@ -25,6 +25,8 @@ export default function CheckoutForm() {
   const token = searchParams.get('token') ?? '';
   const target = searchParams.get('target') ?? '';
   const kind = searchParams.get('kind') ?? '';
+  const returnTo = searchParams.get('returnTo') ?? '';
+  const title = searchParams.get('title') ?? '';
   
   const [session, setSession] = useState<SessionPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,12 +39,12 @@ export default function CheckoutForm() {
   );
   
   const deepLinkSuccess = useMemo(
-    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=success&target=${encodeURIComponent(target)}&kind=${encodeURIComponent(kind)}` : ''),
-    [paymentReturnBase, target, kind]
+    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=success&target=${encodeURIComponent(target)}&kind=${encodeURIComponent(kind)}&returnTo=${encodeURIComponent(returnTo)}&title=${encodeURIComponent(title)}` : ''),
+    [paymentReturnBase, target, kind, returnTo, title]
   );
   const deepLinkFailed = useMemo(
-    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=failed&target=${encodeURIComponent(target)}&kind=${encodeURIComponent(kind)}` : ''),
-    [paymentReturnBase, target, kind]
+    () => (paymentReturnBase ? `${paymentReturnBase}/payment/success?status=failed&target=${encodeURIComponent(target)}&kind=${encodeURIComponent(kind)}&returnTo=${encodeURIComponent(returnTo)}&title=${encodeURIComponent(title)}` : ''),
+    [paymentReturnBase, target, kind, returnTo, title]
   );
 
   useEffect(() => {
