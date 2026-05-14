@@ -123,7 +123,7 @@ export default function CheckoutForm() {
   }, [session, scriptReady, autoOpened, startPayment]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0F172A] pb-24 text-center">
+    <div className="flex flex-col items-center justify-center h-full bg-[#0F172A] pb-24 text-center">
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
         strategy="afterInteractive"
