@@ -58,7 +58,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true });
       }
 
-      // Calculate access expiry if it's a video purchase
+      // Calculate access expiry based on content kind
       let accessExpiresAt: Date | null = null;
       if (purchase.kind === 'video') {
         const video = await prisma.video.findUnique({
@@ -66,6 +66,15 @@ export async function POST(req: Request) {
           select: { accessValidityDays: true },
         });
         const validityDays = Math.max(0, video?.accessValidityDays ?? 0);
+        if (validityDays > 0) {
+          accessExpiresAt = new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000);
+        }
+      } else if (purchase.kind === 'category') {
+        const category = await prisma.category.findUnique({
+          where: { id: purchase.targetId },
+          select: { accessValidityDays: true },
+        });
+        const validityDays = Math.max(0, category?.accessValidityDays ?? 0);
         if (validityDays > 0) {
           accessExpiresAt = new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000);
         }
