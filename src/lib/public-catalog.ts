@@ -20,6 +20,7 @@ export type PublicCatalogVideo = {
   isFree?: boolean;
   accessValidityDays?: number;
   dashUrl: string;
+  hlsUrl?: string;
 };
 
 export type PublicCategoryRow = {
@@ -153,6 +154,7 @@ export async function buildPublicCatalogPayload(): Promise<PublicCatalogPayload>
       isFree: v.isFree,
       accessValidityDays: v.accessValidityDays,
       dashUrl: v.dashUrl,
+      hlsUrl: v.hlsUrl ?? undefined,
     };
   }
 

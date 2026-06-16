@@ -28,6 +28,7 @@ export default function NewVideoPage() {
   const [description, setDescription] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [dashUrl, setDashUrl] = useState('');
+  const [hlsUrl, setHlsUrl] = useState('');
   const [topics, setTopics] = useState('Intro, Core, Practice, Summary');
   const [isFree, setIsFree] = useState(false);
   const [accessValidityDays, setAccessValidityDays] = useState(30);
@@ -118,6 +119,7 @@ export default function NewVideoPage() {
           description,
           thumbnailUrl: finalThumbnailUrl,
           dashUrl,
+          hlsUrl: hlsUrl.trim() ? hlsUrl.trim() : undefined,
           topics: parsedTopics,
           isFree: videoType === 'individual' ? isFree : false,
           accessValidityDays: videoType === 'individual' && !isFree ? accessValidityDays : 0,
@@ -219,13 +221,24 @@ export default function NewVideoPage() {
           )}
         </div>
         <div className="xl:col-span-3">
-          <label className="text-xs font-medium text-slate-600">Stream URL (DASH / HLS)</label>
+          <label className="text-xs font-medium text-slate-600">DASH stream URL (Android)</label>
           <input
             className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
             value={dashUrl}
             onChange={(e) => setDashUrl(e.target.value)}
+            placeholder="https://.../output.mpd"
             required
           />
+        </div>
+        <div className="xl:col-span-3">
+          <label className="text-xs font-medium text-slate-600">HLS stream URL (iOS / App Store)</label>
+          <input
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            value={hlsUrl}
+            onChange={(e) => setHlsUrl(e.target.value)}
+            placeholder="https://.../output.m3u8"
+          />
+          <p className="mt-1 text-xs text-slate-500">iPhone users need .m3u8 (HLS). Android uses DASH (.mpd) above.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:col-span-3 xl:grid-cols-3">
           <div className="md:col-span-2 xl:col-span-3">

@@ -29,6 +29,7 @@ const patchSchema = z
     description: z.string().min(1).optional(),
     thumbnailUrl: z.string().min(1).optional(),
     dashUrl: z.string().url().optional(),
+    hlsUrl: z.string().url().nullable().optional(),
     topics: z.array(z.string()).optional(),
     isFree: z.boolean().optional(),
     accessValidityDays: z.number().int().min(0).optional(),

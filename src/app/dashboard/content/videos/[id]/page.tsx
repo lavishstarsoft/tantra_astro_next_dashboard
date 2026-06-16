@@ -22,6 +22,7 @@ type VideoRow = {
   description: string;
   thumbnailUrl: string;
   dashUrl: string;
+  hlsUrl: string | null;
   topicsJson: string;
   isFree: boolean;
   published: boolean;
@@ -43,6 +44,7 @@ export default function EditVideoPage() {
   const [videoType, setVideoType] = useState<VideoType>('individual');
 
   const [dashUrl, setDashUrl] = useState('');
+  const [hlsUrl, setHlsUrl] = useState('');
   const [language, setLanguage] = useState('Telugu');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -91,6 +93,7 @@ export default function EditVideoPage() {
       const v = data.video;
       setVideo(v);
       setDashUrl(v.dashUrl);
+      setHlsUrl(v.hlsUrl ?? '');
       setLanguage(v.language);
       setThumbnailUrl(v.thumbnailUrl);
       setDescription(v.description);
@@ -130,6 +133,7 @@ export default function EditVideoPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           dashUrl,
+          hlsUrl: hlsUrl.trim() ? hlsUrl.trim() : null,
           language,
           thumbnailUrl,
           description,
@@ -332,12 +336,23 @@ export default function EditVideoPage() {
           )}
         </div>
         <div className="xl:col-span-3">
-          <label className="text-xs font-medium text-slate-600">Stream URL</label>
+          <label className="text-xs font-medium text-slate-600">DASH stream URL (Android)</label>
           <input
             className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
             value={dashUrl}
             onChange={(e) => setDashUrl(e.target.value)}
+            placeholder="https://.../output.mpd"
           />
+        </div>
+        <div className="xl:col-span-3">
+          <label className="text-xs font-medium text-slate-600">HLS stream URL (iOS / App Store)</label>
+          <input
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            value={hlsUrl}
+            onChange={(e) => setHlsUrl(e.target.value)}
+            placeholder="https://.../output.m3u8"
+          />
+          <p className="mt-1 text-xs text-slate-500">iPhone users need .m3u8 (HLS). Android uses DASH (.mpd) above.</p>
         </div>
         <div className="xl:col-span-3">
           <label className="text-xs font-medium text-slate-600">Language</label>

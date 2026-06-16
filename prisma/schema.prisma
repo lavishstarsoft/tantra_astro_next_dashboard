@@ -145,6 +145,8 @@ model Video {
   description          String
   thumbnailUrl         String
   dashUrl              String
+  /** HLS stream for iOS (AVPlayer). Android uses dashUrl. */
+  hlsUrl               String?
   topicsJson           String
   /**
    * INR in paise for one-off Checkout
