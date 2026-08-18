@@ -158,9 +158,11 @@ model Video {
   sortOrder            Int                @default(0)
   categoryId           String             @db.ObjectId
   category             Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  practiceEnabled      Boolean            @default(false)
   packItems            CategoryPackItem[]
   bookmarks            UserBookmark[]
   progressEntries      UserVideoProgress[]
+  quizQuestions        QuizQuestion[]
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 }
@@ -212,6 +214,7 @@ model AppHomeConfig {
   featuredCategoryNamesJson   String   @default("[]")
   showContinueWatching        Boolean  @default(true)
   isReviewMode                Boolean  @default(false)
+  practiceMasterEnabled       Boolean  @default(false)
   buyButtonText               String   @default("Enroll Now")
   updatedAt                   DateTime @updatedAt
   createdAt                   DateTime @default(now())
@@ -307,4 +310,57 @@ model InAppMessage {
   updatedAt     DateTime @updatedAt
 
   @@index([active])
+}
+
+// Audit-durable (no cascade relation): survives AppUser deletion so admin action stays logged.
+model AccountDeletionRequest {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String    @db.ObjectId
+  userName   String
+  userEmail  String
+  userPhone  String
+  status     String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  reason     String?
+  adminNote  String?
+  reviewedBy String?   // AdminUser id
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+// Practice & Master — server-authoritative quiz questions per video (iOS-only feature).
+model QuizQuestion {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  videoId     String   @db.ObjectId
+  video       Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  prompt      String
+  optionsJson String   // JSON string array of choice labels
+  correctIndex Int
+  explanation String   @default("")
+  topic       String?
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([videoId, sortOrder])
+}
+
+// Latest quiz result per user+video (deterministic scoring stored server-side).
+model QuizResult {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  videoId   String   @db.ObjectId
+  topic     String?
+  correct   Int
+  total     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, videoId])
+  @@index([userId])
+  @@index([userId, topic])
 }

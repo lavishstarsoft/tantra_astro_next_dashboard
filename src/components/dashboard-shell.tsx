@@ -18,7 +18,9 @@ const nav = [
   { href: '/dashboard/content/pages', label: 'App Pages', icon: 'pages' },
   { href: '/dashboard/content/upcoming', label: 'Upcoming', icon: 'new' },
   { href: '/dashboard/notifications', label: 'Notifications', icon: 'pages' },
+  { href: '/dashboard/practice', label: 'Practice & Master', icon: 'new' },
   { href: '/dashboard/users', label: 'Registered Users', icon: 'users' },
+  { href: '/dashboard/deletion-requests', label: 'Deletion Requests', icon: 'users' },
   { href: '/dashboard/commerce/orders', label: 'Orders', icon: 'orders' },
   { href: '/dashboard/analytics', label: 'Analytics', icon: 'analytics' },
 ] as const;
