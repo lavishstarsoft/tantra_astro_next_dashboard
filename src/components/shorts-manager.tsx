@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export type ShortRow = {
   id: string;
@@ -44,9 +44,35 @@ async function uploadFile(file: File): Promise<string> {
 export function ShortsManager({ initial, videoTitles }: { initial: ShortRow[]; videoTitles: string[] }) {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft>(emptyDraft());
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<'video' | 'thumb' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  const isEditing = editingId !== null;
+
+  function startEdit(s: ShortRow) {
+    setEditingId(s.id);
+    setDraft({
+      title: s.title,
+      topic: s.topic,
+      teacher: s.teacher,
+      videoUrl: s.videoUrl,
+      thumbnailUrl: s.thumbnailUrl,
+      duration: String(s.duration || ''),
+      caption: s.caption,
+      linkedVideoTitle: s.linkedVideoTitle || '',
+    });
+    setError(null);
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft(emptyDraft());
+    setError(null);
+  }
 
   async function onPickVideo(file?: File) {
     if (!file) return;
@@ -82,28 +108,30 @@ export function ShortsManager({ initial, videoTitles }: { initial: ShortRow[]; v
     if (!draft.videoUrl) return setError('Please choose and upload a video first');
     setBusy(true);
     try {
-      const res = await fetch('/api/admin/shorts', {
-        method: 'POST',
+      const body = {
+        title: draft.title.trim(),
+        topic: draft.topic.trim() || 'General',
+        teacher: draft.teacher.trim(),
+        videoUrl: draft.videoUrl,
+        thumbnailUrl: draft.thumbnailUrl,
+        duration: Number(draft.duration) || 0,
+        caption: draft.caption.trim(),
+        linkedVideoTitle: draft.linkedVideoTitle || null,
+      };
+      const url = isEditing ? `/api/admin/shorts/${editingId}` : '/api/admin/shorts';
+      const method = isEditing ? 'PATCH' : 'POST';
+      const res = await fetch(url, {
+        method,
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: draft.title.trim(),
-          topic: draft.topic.trim() || 'General',
-          teacher: draft.teacher.trim(),
-          videoUrl: draft.videoUrl,
-          thumbnailUrl: draft.thumbnailUrl,
-          duration: Number(draft.duration) || 0,
-          caption: draft.caption.trim(),
-          linkedVideoTitle: draft.linkedVideoTitle || undefined,
-          published: true,
-        }),
+        body: JSON.stringify(isEditing ? body : { ...body, published: true }),
       });
       if (!res.ok) {
         const data = await res.json();
         setError(typeof data.error === 'string' ? data.error : 'Save failed');
         return;
       }
-      setDraft(emptyDraft());
+      cancelEdit();
       router.refresh();
     } catch {
       setError('Save failed');
@@ -134,6 +162,7 @@ export function ShortsManager({ initial, videoTitles }: { initial: ShortRow[]; v
     try {
       const res = await fetch(`/api/admin/shorts/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) { alert('Delete failed'); return; }
+      if (editingId === id) cancelEdit();
       router.refresh();
     } finally {
       setBusy(false);
@@ -151,21 +180,26 @@ export function ShortsManager({ initial, videoTitles }: { initial: ShortRow[]; v
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-700">Add short</h2>
+      <div ref={formRef} className={`rounded-2xl border p-4 shadow-sm ${isEditing ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-white'}`}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-700">{isEditing ? 'Edit short' : 'Add short'}</h2>
+          {isEditing ? (
+            <button onClick={cancelEdit} className="text-xs font-semibold text-slate-500 hover:text-slate-700">Cancel edit</button>
+          ) : null}
+        </div>
 
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           <div>
-            <label className="text-xs font-medium text-slate-600">Video file (9:16 portrait)</label>
+            <label className="text-xs font-medium text-slate-600">Video file (9:16 portrait){isEditing ? ' — choose to replace' : ''}</label>
             <input type="file" accept="video/*" onChange={(e) => onPickVideo(e.target.files?.[0])} className="mt-1 block w-full text-sm" />
             {uploading === 'video' ? <p className="mt-1 text-xs text-sky-600">Uploading video…</p> : null}
-            {draft.videoUrl ? <p className="mt-1 text-xs text-emerald-600">✓ Video uploaded</p> : null}
+            {draft.videoUrl ? <p className="mt-1 truncate text-xs text-emerald-600">✓ Video: {draft.videoUrl.split('/').pop()}</p> : null}
           </div>
           <div>
             <label className="text-xs font-medium text-slate-600">Thumbnail (optional)</label>
             <input type="file" accept="image/*" onChange={(e) => onPickThumb(e.target.files?.[0])} className="mt-1 block w-full text-sm" />
             {uploading === 'thumb' ? <p className="mt-1 text-xs text-sky-600">Uploading…</p> : null}
-            {draft.thumbnailUrl ? <p className="mt-1 text-xs text-emerald-600">✓ Thumbnail uploaded</p> : null}
+            {draft.thumbnailUrl ? <p className="mt-1 text-xs text-emerald-600">✓ Thumbnail set</p> : null}
           </div>
         </div>
 
@@ -182,13 +216,21 @@ export function ShortsManager({ initial, videoTitles }: { initial: ShortRow[]; v
           <label className="text-xs font-medium text-slate-600">Link full course (optional)</label>
           <select value={draft.linkedVideoTitle} onChange={(e) => setDraft({ ...draft, linkedVideoTitle: e.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
             <option value="">— No linked course —</option>
+            {draft.linkedVideoTitle && !videoTitles.includes(draft.linkedVideoTitle) ? (
+              <option value={draft.linkedVideoTitle}>{draft.linkedVideoTitle} (current)</option>
+            ) : null}
             {videoTitles.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
 
-        <button disabled={busy || uploading !== null} onClick={save} className="mt-4 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 disabled:opacity-50">
-          {busy ? 'Saving…' : 'Save short'}
-        </button>
+        <div className="mt-4 flex items-center gap-2">
+          <button disabled={busy || uploading !== null} onClick={save} className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 disabled:opacity-50">
+            {busy ? 'Saving…' : isEditing ? 'Update short' : 'Save short'}
+          </button>
+          {isEditing ? (
+            <button disabled={busy} onClick={cancelEdit} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          ) : null}
+        </div>
         {error ? <p className="mt-2 text-sm text-rose-600">{error}</p> : null}
       </div>
 
@@ -197,18 +239,15 @@ export function ShortsManager({ initial, videoTitles }: { initial: ShortRow[]; v
           <p className="text-sm text-slate-400">No shorts yet.</p>
         ) : (
           initial.map((s, i) => (
-            <div key={s.id} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-              <div className="flex h-16 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100">
-                {s.thumbnailUrl ? <img src={s.thumbnailUrl} alt="" className="h-full w-full object-cover" /> : <span className="text-slate-400">▶</span>}
-              </div>
+            <div key={s.id} className={`flex items-center gap-3 rounded-2xl border bg-white p-3 shadow-sm ${editingId === s.id ? 'border-amber-300' : 'border-slate-200'}`}>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-slate-800">{s.title}</p>
-                <p className="truncate text-xs text-slate-500">{s.topic} · {s.duration}s{s.linkedVideoTitle ? ` · → ${s.linkedVideoTitle}` : ''}</p>
+                <p className="text-xs text-slate-500">{s.duration}s</p>
               </div>
-              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${s.published ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{s.published ? 'Live' : 'Hidden'}</span>
               <div className="flex gap-1">
                 <button disabled={busy} onClick={() => move(i, -1)} className="rounded border px-2 py-1 text-xs">↑</button>
                 <button disabled={busy} onClick={() => move(i, 1)} className="rounded border px-2 py-1 text-xs">↓</button>
+                <button disabled={busy} onClick={() => startEdit(s)} className="rounded border border-sky-200 px-2 py-1 text-xs font-semibold text-sky-600">Edit</button>
                 <button disabled={busy} onClick={() => patch(s.id, { published: !s.published })} className="rounded border px-2 py-1 text-xs">{s.published ? 'Hide' : 'Show'}</button>
                 <button disabled={busy} onClick={() => remove(s.id)} className="rounded border border-rose-200 px-2 py-1 text-xs text-rose-600">Delete</button>
               </div>

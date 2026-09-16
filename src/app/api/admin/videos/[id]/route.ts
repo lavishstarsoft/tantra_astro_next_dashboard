@@ -17,6 +17,7 @@ function parseAmountFromLabel(label?: string | null): number | null {
 
 const patchSchema = z
   .object({
+    title: z.string().min(1).max(200).optional(),
     subtitle: z.string().min(1).optional(),
     meta: z.string().min(1).optional(),
     duration: z.string().min(1).optional(),
@@ -160,6 +161,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
     return NextResponse.json({ video });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Update failed';
+    if (e && typeof e === 'object' && 'code' in e && (e as { code?: string }).code === 'P2002') {
+      return NextResponse.json({ error: 'A video with this title already exists. Choose a different title.' }, { status: 409 });
+    }
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 }

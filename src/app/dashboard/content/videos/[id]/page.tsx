@@ -44,6 +44,7 @@ export default function EditVideoPage() {
   const [videoType, setVideoType] = useState<VideoType>('individual');
 
   const [dashUrl, setDashUrl] = useState('');
+  const [title, setTitle] = useState('');
   const [hlsUrl, setHlsUrl] = useState('');
   const [language, setLanguage] = useState('Telugu');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
@@ -93,6 +94,7 @@ export default function EditVideoPage() {
       const v = data.video;
       setVideo(v);
       setDashUrl(v.dashUrl);
+      setTitle(v.title);
       setHlsUrl(v.hlsUrl ?? '');
       setLanguage(v.language);
       setThumbnailUrl(v.thumbnailUrl);
@@ -132,6 +134,7 @@ export default function EditVideoPage() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+            title: title.trim(),
           dashUrl,
           hlsUrl: hlsUrl.trim() ? hlsUrl.trim() : null,
           language,
@@ -216,9 +219,9 @@ export default function EditVideoPage() {
         <div className="xl:col-span-3">
           <label className="text-xs font-medium text-slate-600">Title</label>
           <input
-            className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
-            value={video.title}
-            readOnly
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
         </div>
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 xl:col-span-3">
