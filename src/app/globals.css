@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+
+  /* Neutral surfaces */
+  --canvas: 244 247 251; /* app background */
+  --surface: 255 255 255; /* cards */
+  --surface-2: 248 250 253; /* subtle inset */
+  --line: 226 232 240; /* borders */
+
+  /* Text */
+  --ink: 15 23 42; /* slate-900 */
+  --ink-muted: 71 85 105; /* slate-600 */
+  --ink-soft: 148 163 184; /* slate-400 */
+}
+
+body {
+  @apply min-h-screen bg-canvas text-ink antialiased;
+}
+
+/* ---------- Reusable component layer ---------- */
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-surface shadow-card;
+  }
+
+  .card-hover {
+    @apply transition duration-200 hover:-translate-y-0.5 hover:shadow-card-lg;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-brand-600 text-white shadow-glow hover:bg-brand-700 active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply btn border border-line bg-surface text-ink-muted hover:bg-surface-2 hover:text-ink;
+  }
+  .btn-soft {
+    @apply btn bg-brand-50 text-brand-700 hover:bg-brand-100;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/30;
+  }
+
+  .section-title {
+    @apply text-[17px] font-semibold tracking-tight text-ink;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-surface-2;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent;
+  }
+}
+
+/* Slim, elegant scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(203 213 225) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(203 213 225);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(148 163 184);
+}
+
+/* Top navigation progress bar */
+@keyframes nprogress-grow {
+  0% { width: 0; }
+  50% { width: 70%; }
+  100% { width: 92%; }
+}
