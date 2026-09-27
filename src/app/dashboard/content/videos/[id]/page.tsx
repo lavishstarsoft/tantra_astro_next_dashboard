@@ -28,9 +28,13 @@ type VideoRow = {
   published: boolean;
   checkoutAmountCents: number;
   accessValidityDays: number;
+  pricingTiers?: { days: number; amountCents: number; label: string }[];
   packItems: { id: string; categoryId: string; videoId: string }[];
   category: { name: string };
 };
+
+// Row shape used while editing (string inputs; amount is in rupees).
+type TierDraft = { days: string; amount: string; label: string };
 
 export default function EditVideoPage() {
   const { id } = useParams<{ id: string }>();
@@ -56,7 +60,13 @@ export default function EditVideoPage() {
   const [categoryName, setCategoryName] = useState('');
   const [priceLabel, setPriceLabel] = useState('');
   const [individualPriceLabel, setIndividualPriceLabel] = useState('');
+  const [tiers, setTiers] = useState<TierDraft[]>([]);
   const showPricingFields = videoType === 'individual' && !isFree;
+
+  const addTier = () => setTiers((t) => [...t, { days: '', amount: '', label: '' }]);
+  const removeTier = (i: number) => setTiers((t) => t.filter((_, idx) => idx !== i));
+  const updateTier = (i: number, key: keyof TierDraft, val: string) =>
+    setTiers((t) => t.map((row, idx) => (idx === i ? { ...row, [key]: val } : row)));
 
   async function uploadThumbnail(file: File) {
     setUploadingThumb(true);
@@ -103,6 +113,13 @@ export default function EditVideoPage() {
       setIndividualPriceLabel(v.individualPriceLabel ?? '');
       setIsFree(v.isFree);
       setAccessValidityDays(v.accessValidityDays ?? 0);
+      setTiers(
+        (v.pricingTiers ?? []).map((t) => ({
+          days: String(t.days),
+          amount: String(Math.round(t.amountCents / 100)),
+          label: t.label ?? '',
+        }))
+      );
       setCategoryName(v.category.name);
       setVideoType(v.packItems.length > 0 ? 'categoryPack' : 'individual');
       try {
@@ -151,6 +168,16 @@ export default function EditVideoPage() {
               : null,
           isFree: videoType === 'individual' ? isFree : false,
           accessValidityDays: videoType === 'individual' && !isFree ? accessValidityDays : 0,
+          pricingTiers:
+            videoType === 'individual' && !isFree
+              ? tiers
+                  .map((t) => ({
+                    days: Math.max(0, Math.floor(Number(t.days) || 0)),
+                    amountCents: Math.round((Number(t.amount) || 0) * 100),
+                    label: t.label.trim(),
+                  }))
+                  .filter((t) => t.days > 0 && t.amountCents > 0)
+              : [],
           addToCategoryPack: videoType === 'categoryPack',
           published,
         }),
@@ -297,6 +324,83 @@ export default function EditVideoPage() {
                 onChange={(e) => setAccessValidityDays(Math.max(0, Number(e.target.value) || 0))}
               />
               <p className="mt-1 text-[11px] text-slate-500">Set 0 for unlimited validity.</p>
+            </div>
+
+            <div className="xl:col-span-3 rounded-xl border border-purple-200 bg-purple-50/50 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-800">Validity &amp; price options (multiple)</h3>
+                  <p className="text-[11px] text-slate-500">
+                    Buyers pick one option at checkout. Leave empty to use the single price &amp; validity above.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addTier}
+                  className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700">
+                  + Add option
+                </button>
+              </div>
+
+              {tiers.length > 0 ? (
+                <div className="mt-3 space-y-2">
+                  {tiers.map((t, i) => (
+                    <div key={i} className="flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 bg-white p-2">
+                      <div className="w-24">
+                        <label className="text-[11px] font-medium text-slate-500">Days</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={t.days}
+                          onChange={(e) => updateTier(i, 'days', e.target.value)}
+                          placeholder="90"
+                          className="mt-0.5 w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm text-slate-700"
+                        />
+                      </div>
+                      <div className="w-28">
+                        <label className="text-[11px] font-medium text-slate-500">Amount (₹)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={t.amount}
+                          onChange={(e) => updateTier(i, 'amount', e.target.value)}
+                          placeholder="250"
+                          className="mt-0.5 w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm text-slate-700"
+                        />
+                      </div>
+                      <div className="min-w-[8rem] flex-1">
+                        <label className="text-[11px] font-medium text-slate-500">Label (optional)</label>
+                        <input
+                          value={t.label}
+                          onChange={(e) => updateTier(i, 'label', e.target.value)}
+                          placeholder="3 Months"
+                          className="mt-0.5 w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm text-slate-700"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeTier(i)}
+                        className="rounded-md border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 text-xs text-slate-400">No options added — using the single price &amp; validity above.</p>
+              )}
+
+              <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-[12px] leading-relaxed text-amber-900">
+                <p className="font-semibold">ℹ️ ఎలా వాడాలి</p>
+                <p className="mt-1">
+                  ఒక్కో video కి ఎన్ని validity options అయినా పెట్టొచ్చు. ఉదా: <b>90 రోజులు — ₹250</b>, <b>180 రోజులు — ₹500</b>.
+                  User buy చేసేటప్పుడు వీటిలో ఒకటి ఎంచుకుంటాడు.
+                </p>
+                <p className="mt-1">
+                  <b>Days</b> = ఎన్ని రోజులు access, <b>Amount</b> = ఆ ధర (₹), <b>Label</b> = user కి కనిపించే పేరు (ఖాళీ అయితే auto).
+                  Options ఏవీ పెట్టకపోతే పైన ఉన్న single price &amp; validity వాడుతుంది.
+                </p>
+              </div>
             </div>
           </>
         ) : videoType === 'categoryPack' ? (

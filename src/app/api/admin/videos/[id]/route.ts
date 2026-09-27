@@ -34,6 +34,15 @@ const patchSchema = z
     topics: z.array(z.string()).optional(),
     isFree: z.boolean().optional(),
     accessValidityDays: z.number().int().min(0).optional(),
+    pricingTiers: z
+      .array(
+        z.object({
+          days: z.number().int().min(1),
+          amountCents: z.number().int().min(0),
+          label: z.string().default(''),
+        })
+      )
+      .optional(),
     published: z.boolean().optional(),
     categoryName: z.string().min(1).optional(),
     addToCategoryPack: z.boolean().optional(),
@@ -84,6 +93,16 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const data: Record<string, unknown> = { ...body };
   const addToCategoryPack = body.addToCategoryPack;
   delete data.addToCategoryPack;
+  if (body.pricingTiers) {
+    // Composite list updates use `{ set: [...] }` to fully replace the array.
+    data.pricingTiers = {
+      set: body.pricingTiers.map((t) => ({
+        days: t.days,
+        amountCents: t.amountCents,
+        label: t.label ?? '',
+      })),
+    };
+  }
   if (body.topics) {
     data.topicsJson = JSON.stringify(body.topics);
     delete data.topics;

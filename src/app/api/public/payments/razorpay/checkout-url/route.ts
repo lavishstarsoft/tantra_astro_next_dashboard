@@ -10,6 +10,8 @@ const bodySchema = z
     kind: z.enum(['video', 'category']),
     videoTitle: z.string().min(1).optional(),
     categoryName: z.string().min(1).optional(),
+    // Index into the video's pricingTiers, when the buyer picked an option.
+    tierIndex: z.number().int().min(0).optional(),
   })
   .refine((v) => (v.kind === 'video' ? Boolean(v.videoTitle) : Boolean(v.categoryName)), {
     message: 'Missing target',
@@ -39,11 +41,18 @@ export async function POST(req: Request) {
     kind === 'video'
       ? await prisma.video.findUnique({
           where: { title: parsed.data.videoTitle! },
-          select: { id: true, title: true, checkoutAmountCents: true, isFree: true },
+          select: {
+            id: true,
+            title: true,
+            checkoutAmountCents: true,
+            accessValidityDays: true,
+            pricingTiers: true,
+            isFree: true,
+          },
         })
       : await prisma.category.findUnique({
           where: { name: parsed.data.categoryName! },
-          select: { id: true, name: true, checkoutAmountCents: true },
+          select: { id: true, name: true, checkoutAmountCents: true, accessValidityDays: true },
         });
 
   if (!target) {
@@ -52,7 +61,23 @@ export async function POST(req: Request) {
   if (kind === 'video' && 'isFree' in target && target.isFree) {
     return NextResponse.json({ error: 'This video is free' }, { status: 400 });
   }
-  if ('checkoutAmountCents' in target && Number(target.checkoutAmountCents) <= 0) {
+  // Resolve the effective amount + validity: a chosen pricing option (video
+  // only) if valid, otherwise the target's single default.
+  let amountCents = Number(target.checkoutAmountCents ?? 0);
+  let validityDays = Number(('accessValidityDays' in target ? target.accessValidityDays : 0) ?? 0);
+  if (
+    kind === 'video' &&
+    parsed.data.tierIndex != null &&
+    'pricingTiers' in target &&
+    Array.isArray(target.pricingTiers) &&
+    target.pricingTiers[parsed.data.tierIndex]
+  ) {
+    const tier = target.pricingTiers[parsed.data.tierIndex]!;
+    amountCents = Number(tier.amountCents);
+    validityDays = Number(tier.days);
+  }
+
+  if (!amountCents || amountCents <= 0) {
     return NextResponse.json({ error: 'Payment amount is invalid' }, { status: 400 });
   }
 
@@ -64,6 +89,8 @@ export async function POST(req: Request) {
       userId: gate.user.id,
       kind,
       targetId: target.id,
+      amountCents,
+      validityDays,
       expiresAt,
     },
   });

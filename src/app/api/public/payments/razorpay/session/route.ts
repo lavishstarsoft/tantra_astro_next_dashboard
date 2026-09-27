@@ -30,7 +30,8 @@ export async function GET(req: Request) {
       : Promise.resolve(null),
   ]);
 
-  const amountCents = session.kind === 'video' ? (video?.checkoutAmountCents ?? 0) : (category?.checkoutAmountCents ?? 0);
+  const defaultAmount = session.kind === 'video' ? (video?.checkoutAmountCents ?? 0) : (category?.checkoutAmountCents ?? 0);
+  const amountCents = session.amountCents ?? defaultAmount;
   if (!amountCents || amountCents <= 0) {
     return NextResponse.json({ error: 'Payment amount is invalid' }, { status: 400 });
   }
@@ -60,6 +61,7 @@ export async function GET(req: Request) {
       status: 'pending',
       provider: 'razorpay',
       amountTotalCents: amountCents,
+      validityDays: session.validityDays ?? null,
       currency: 'INR',
       razorpayOrderId: order.id,
     },

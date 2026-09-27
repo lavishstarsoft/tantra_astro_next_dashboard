@@ -91,6 +91,9 @@ model Purchase {
   razorpayOrderId   String?  @unique
   razorpayPaymentId String?
   accessExpiresAt   DateTime?
+  /// Validity (days) locked from the chosen pricing option at checkout time,
+  /// used by verify + webhook to compute accessExpiresAt.
+  validityDays      Int?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -106,6 +109,10 @@ model PaymentSession {
   user      AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
   kind      String // 'video' | 'category'
   targetId  String   @db.ObjectId
+  /// Selected pricing option locked at checkout (falls back to the target's
+  /// default checkoutAmountCents / accessValidityDays when null).
+  amountCents  Int?
+  validityDays Int?
   expiresAt DateTime
   createdAt DateTime @default(now())
 
@@ -128,6 +135,13 @@ model Category {
   videos              Video[]
   packItems           CategoryPackItem[]
   bookmarks           UserCategoryBookmark[]
+}
+
+/// One selectable validity + price option for a video (e.g. 90 days @ ₹250).
+type PricingTier {
+  days        Int
+  amountCents Int
+  label       String @default("")
 }
 
 model Video {
@@ -153,6 +167,9 @@ model Video {
    */
   checkoutAmountCents  Int                @default(99900)
   accessValidityDays   Int                @default(0)
+  /// Optional multi-option pricing. When non-empty, the buyer picks one option
+  /// (days + amount); falls back to checkoutAmountCents/accessValidityDays.
+  pricingTiers         PricingTier[]
   isFree               Boolean            @default(false)
   published            Boolean            @default(true)
   sortOrder            Int                @default(0)

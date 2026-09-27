@@ -19,6 +19,7 @@ export type PublicCatalogVideo = {
   category?: string;
   isFree?: boolean;
   accessValidityDays?: number;
+  pricingTiers?: { days: number; amountCents: number; label: string }[];
   dashUrl: string;
   hlsUrl?: string;
 };
@@ -153,6 +154,11 @@ export async function buildPublicCatalogPayload(): Promise<PublicCatalogPayload>
       category: v.category.name,
       isFree: v.isFree,
       accessValidityDays: v.accessValidityDays,
+      pricingTiers: (v.pricingTiers ?? []).map((t) => ({
+        days: t.days,
+        amountCents: t.amountCents,
+        label: t.label ?? '',
+      })),
       dashUrl: v.dashUrl,
       hlsUrl: v.hlsUrl ?? undefined,
     };
