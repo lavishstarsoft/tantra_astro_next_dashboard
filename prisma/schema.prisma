@@ -233,6 +233,12 @@ model AppHomeConfig {
   isReviewMode                Boolean  @default(false)
   practiceMasterEnabled       Boolean  @default(false)
   buyButtonText               String   @default("Enroll Now")
+  /// Home popup shown after the app opens (once per app launch). Admin toggles
+  /// it and sets an image or video shown inside; optional deep-link target.
+  homePopupEnabled            Boolean  @default(false)
+  homePopupType               String   @default("image") // 'image' | 'video'
+  homePopupMediaUrl           String   @default("")
+  homePopupLink               String   @default("")
   updatedAt                   DateTime @updatedAt
   createdAt                   DateTime @default(now())
 }

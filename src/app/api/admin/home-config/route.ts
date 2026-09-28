@@ -10,6 +10,10 @@ const updateSchema = z.object({
   showContinueWatching: z.boolean().optional(),
   isReviewMode: z.boolean().optional(),
   buyButtonText: z.string().min(1).optional(),
+  homePopupEnabled: z.boolean().optional(),
+  homePopupType: z.enum(['image', 'video']).optional(),
+  homePopupMediaUrl: z.string().optional(),
+  homePopupLink: z.string().optional(),
 });
 
 export async function GET() {
@@ -44,6 +48,10 @@ export async function GET() {
       showContinueWatching: cfg?.showContinueWatching ?? true,
       isReviewMode: cfg?.isReviewMode ?? false,
       buyButtonText: cfg?.buyButtonText ?? 'Enroll Now',
+      homePopupEnabled: cfg?.homePopupEnabled ?? false,
+      homePopupType: cfg?.homePopupType ?? 'image',
+      homePopupMediaUrl: cfg?.homePopupMediaUrl ?? '',
+      homePopupLink: cfg?.homePopupLink ?? '',
     },
     options: {
       videos: videos.filter((v) => v.published),
@@ -87,6 +95,18 @@ export async function PATCH(req: Request) {
       ...(body.buyButtonText
         ? { buyButtonText: body.buyButtonText }
         : {}),
+      ...(typeof body.homePopupEnabled === 'boolean'
+        ? { homePopupEnabled: body.homePopupEnabled }
+        : {}),
+      ...(body.homePopupType
+        ? { homePopupType: body.homePopupType }
+        : {}),
+      ...(typeof body.homePopupMediaUrl === 'string'
+        ? { homePopupMediaUrl: body.homePopupMediaUrl }
+        : {}),
+      ...(typeof body.homePopupLink === 'string'
+        ? { homePopupLink: body.homePopupLink }
+        : {}),
     },
     create: {
       key: 'default',
@@ -95,6 +115,10 @@ export async function PATCH(req: Request) {
       showContinueWatching: body.showContinueWatching ?? true,
       isReviewMode: body.isReviewMode ?? false,
       buyButtonText: body.buyButtonText ?? 'Enroll Now',
+      homePopupEnabled: body.homePopupEnabled ?? false,
+      homePopupType: body.homePopupType ?? 'image',
+      homePopupMediaUrl: body.homePopupMediaUrl ?? '',
+      homePopupLink: body.homePopupLink ?? '',
     },
   });
 
@@ -106,6 +130,10 @@ export async function PATCH(req: Request) {
       showContinueWatching: updated.showContinueWatching,
       isReviewMode: updated.isReviewMode,
       buyButtonText: updated.buyButtonText,
+      homePopupEnabled: updated.homePopupEnabled,
+      homePopupType: updated.homePopupType,
+      homePopupMediaUrl: updated.homePopupMediaUrl,
+      homePopupLink: updated.homePopupLink,
     },
   });
 }

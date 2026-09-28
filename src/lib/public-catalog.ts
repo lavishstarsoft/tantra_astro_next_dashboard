@@ -55,6 +55,10 @@ export type PublicCatalogPayload = {
     showContinueWatching: boolean;
     isReviewMode: boolean;
     buyButtonText: string;
+    homePopupEnabled: boolean;
+    homePopupType: 'image' | 'video';
+    homePopupMediaUrl: string;
+    homePopupLink: string;
   };
 };
 
@@ -238,6 +242,10 @@ export async function buildPublicCatalogPayload(): Promise<PublicCatalogPayload>
       showContinueWatching: homeConfig?.showContinueWatching ?? true,
       isReviewMode: homeConfig?.isReviewMode ?? false,
       buyButtonText: homeConfig?.buyButtonText ?? 'Enroll Now',
+      homePopupEnabled: homeConfig?.homePopupEnabled ?? false,
+      homePopupType: (homeConfig?.homePopupType as 'image' | 'video') ?? 'image',
+      homePopupMediaUrl: homeConfig?.homePopupMediaUrl ? absoluteUrl(homeConfig.homePopupMediaUrl) : '',
+      homePopupLink: homeConfig?.homePopupLink ?? '',
     },
   };
 }
