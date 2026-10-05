@@ -65,6 +65,32 @@ export type PublicCatalogPayload = {
 type VideoWithCategory = Video & { category: Category };
 type PackWithVideo = CategoryPackItem & { video: VideoWithCategory };
 
+// Video CDN host — the R2 "thantra" bucket's Cloudflare custom domain
+// (cdn.thantraastro.in, verified live). Public r2.dev asset URLs are rewritten
+// to this host so video segments get real edge caching instead of the
+// rate-limited dev URL. Overridable via the VIDEO_CDN_HOST env var; set it to
+// an empty string there to disable the rewrite entirely.
+const VIDEO_CDN_HOST = (process.env.VIDEO_CDN_HOST ?? 'cdn.thantraastro.in')
+  .trim()
+  .replace(/^https?:\/\//, '')
+  .replace(/\/$/, '');
+
+function toCdnUrl(url: string): string {
+  if (!VIDEO_CDN_HOST || !url) return url;
+  try {
+    const u = new URL(url);
+    if (u.hostname.endsWith('.r2.dev')) {
+      u.protocol = 'https:';
+      u.hostname = VIDEO_CDN_HOST;
+      u.port = '';
+      return u.toString();
+    }
+  } catch {
+    // not an absolute URL — leave untouched
+  }
+  return url;
+}
+
 function absoluteUrl(pathOrUrl: string): string {
   const base = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? '';
   const bucket = process.env.R2_BUCKET_NAME?.replace(/^\/+|\/+$/g, '');
@@ -95,6 +121,9 @@ function absoluteUrl(pathOrUrl: string): string {
     } catch {
       normalizedRemote = normalizedRemote;
     }
+
+    // Serve public r2.dev images via the CDN custom domain when configured.
+    normalizedRemote = toCdnUrl(normalizedRemote);
 
     if (normalizedRemote.includes('.r2.cloudflarestorage.com') && base) {
       return `${base}/api/public/image?url=${encodeURIComponent(normalizedRemote)}`;
@@ -163,8 +192,9 @@ export async function buildPublicCatalogPayload(): Promise<PublicCatalogPayload>
         amountCents: t.amountCents,
         label: t.label ?? '',
       })),
-      dashUrl: v.dashUrl,
-      hlsUrl: v.hlsUrl ?? undefined,
+      // Stream URLs go through the CDN host too (the part that matters most).
+      dashUrl: toCdnUrl(v.dashUrl),
+      hlsUrl: v.hlsUrl ? toCdnUrl(v.hlsUrl) : undefined,
     };
   }
 
